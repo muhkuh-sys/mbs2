@@ -1,5 +1,5 @@
 -- Add the MBS "tools" folder to the LUA search path.
-package.path = 'mbs/tools/?.lua;mbs/tools/?/init.lua;' .. package.path
+package.path = 'mbs2/tools/?.lua;mbs2/tools/?/init.lua;' .. package.path
 
 -----------------------------------------------------------------------------
 --
@@ -145,8 +145,8 @@ end
 function tEnvDefault:CreateEnvironment(astrTools)
   local tEnv = self:Clone()
 
-  -- Read all tools in the mbs/tools folder.
-  local astrToolLuaPaths = pl.dir.getfiles('mbs/tools', '*.lua')
+  -- Read all tools in the mbs2/tools folder.
+  local astrToolLuaPaths = pl.dir.getfiles('mbs2/tools', '*.lua')
   local atKnownTools = {}
   for _, strToolPath in ipairs(astrToolLuaPaths) do
     local strToolId = pl.path.splitext(pl.path.basename(strToolPath))
@@ -396,7 +396,7 @@ tEnvDefault.lib.Driver = DriverGCC_Lib
 
 
 -- Add some common builder.
-tEnvDefault:AddBuilder('mbs/builder/template.lua')
+tEnvDefault:AddBuilder('mbs2/builder/template.lua')
 
 
 
