@@ -380,6 +380,7 @@ local function DriverGCC_Link(label, output, inputs, settings)
   }
   AddJob(output, label, strCmd)
   AddClean(output, strMapFile)
+  AddClean(output, strLogFile)
 end
 tEnvDefault.link.Driver = DriverGCC_Link
 
