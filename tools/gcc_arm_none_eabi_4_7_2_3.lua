@@ -12,7 +12,6 @@ local function setup_compiler_common(tEnv)
   tEnv.link.exe = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-ld')
 
   -- These are the defines for the compiler.
-  -- TODO: move this somewhere else, e.g. compiler package.
   tEnv.cc.flags:Merge {
     '-ffreestanding',
     '-mlong-calls',
