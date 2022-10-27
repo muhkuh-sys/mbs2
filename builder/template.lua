@@ -2,7 +2,7 @@
 --
 -- A BAM builder which replaces a set of fields.
 --
-local tEnv = ...
+local tEnv, strBuilderPath = ...
 if tEnv==nil then
   -------------------------------------------------------------------------------------------------------------------
   --
@@ -56,7 +56,7 @@ else
     AddJob(
       tFilterParameter.output,
       string.format('Template %s', tFilterParameter.input),
-      _bam_exe .. " -e mbs/builder/template.lua '" .. strFilterParameter .. "'"
+      _bam_exe .. " -e " .. strBuilderPath .. " '" .. strFilterParameter .. "'"
     )
     return tFilterParameter.output
   end

@@ -211,7 +211,7 @@ function tEnvDefault:AddBuilder(strBuilder)
   end
   -- Unlock the table as some tools add functions
 --  TableUnlock(tEnv)
-  tChunk(self)
+  tChunk(self, strBuilder)
 --  TableLock(tEnv)
 
   return self
