@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jonchki-artifact version="1.0">
+	<info group="com.github.mbs"
+	      module="mbs"
+	      artifact="mbs"
+	      version="0.0.1"
+	      vcs-id="GITabc">
+		<license name="GPL-2.0"/>
+		<author name="Muhkuh Team" url="https://github.com/muhkuh-sys" />
+		<description>A small layer over BAM for netX projects.</description>
+	</info>
+	<dependencies>
+		<dependency group="com.github.matricks" module="bam" artifact="bam" version="0.5"/>
+		<dependency group="com.github.lunarmodules" module="Penlight" artifact="Penlight" version="1"/>
+		<dependency group="com.github.xpol" module="lua-rapidjson" artifact="lua5.4-lua-rapidjson" version="0"/>
+	</dependencies>
+	<actions>
+		<action name="pack" path="${install_base}">
+			return true
+		</action>
+	</actions>
+</jonchki-artifact>
