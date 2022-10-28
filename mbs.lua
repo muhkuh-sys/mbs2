@@ -180,13 +180,13 @@ function tEnvDefault:CreateEnvironment(astrTools)
     -- Try to load the tool script.
     local strToolScript, strError = pl.utils.readfile(strPath, false)
     if strToolScript==nil then
-      error(string.format('Failed to read script "%s": %s', strToolScriptFile, strError))
+      error(string.format('Failed to read script "%s": %s', strPath, strError))
     end
 
     -- Run the script.
-    local tChunk, strError = pl.compat.load(strToolScript, strToolScriptFile, 't')
+    local tChunk, strError = pl.compat.load(strToolScript, strPath, 't')
     if tChunk==nil then
-      error(string.format('Failed to parse script "%s": %s', strToolScriptFile, strError))
+      error(string.format('Failed to parse script "%s": %s', strPath, strError))
     end
     -- Unlock the table as some tools add functions
 --    TableUnlock(tEnv)
