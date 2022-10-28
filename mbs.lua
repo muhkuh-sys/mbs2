@@ -134,6 +134,8 @@ function tEnvDefault:__easyCommand(tEnv, tTarget, tInput, strToolName, atOverrid
   end
 
   AddJob(strTargetAbs, strLabel, strCmd, astrInput)
+
+  return strTargetAbs
 end
 
 
