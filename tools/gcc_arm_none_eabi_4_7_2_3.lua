@@ -56,6 +56,12 @@ local function setup_compiler_common(tEnv)
     'gcc'
   }
 
+  tEnv.link.flags:Merge{
+    '--gc-sections',
+    '-nostdlib',
+    '-static'
+  }
+
   local atVars = tEnv.atVars
   atVars.OBJCOPY = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-objcopy')
   atVars.OBJCOPY_FLAGS = {'-O', 'binary'}
