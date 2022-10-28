@@ -287,6 +287,18 @@ function tEnvDefault:AddCCFlags(...)
 end
 
 
+function tEnvDefault:AddDefines(...)
+  local tIn = TableFlatten{...}
+  for _, strDefine in ipairs(tIn) do
+    -- Does the define already start with "-D"? If not, add it.
+    if string.sub(strDefine, 1, 2)~='-D' then
+      strDefine = '-D' .. strDefine
+    end
+    self.cc.flags:Add(strDefine)
+  end
+end
+
+
 function tEnvDefault:Compile(...)
   local tIn = TableFlatten{...}
   local atSrc = {}
