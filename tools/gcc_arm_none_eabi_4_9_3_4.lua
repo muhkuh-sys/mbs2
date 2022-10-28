@@ -33,6 +33,25 @@ local function setup_compiler_common(tEnv)
     '-pedantic'
   }
 
+  local atBuildTypes = {
+    ['RELEASE'] = {
+      '-O2'
+    },
+    ['DEBUG'] = {
+      '-O0'
+    }
+  }
+  local strBuildType = tEnv.atVars.BUILD_TYPE
+  local atBuildTypeFlags = atBuildTypes[strBuildType]
+  if atBuildTypeFlags==nil then
+    error(string.format(
+      'Unknown build type: "%s". Known build types are: %s',
+      strBuildType,
+      table.concat(pl.tablex.keys(atBuildTypeFlags), ',')
+    ))
+  end
+  tEnv.cc.flags:Merge(atBuildTypeFlags)
+
   tEnv.link.libs = {
     'm',
     'c',
