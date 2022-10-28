@@ -43,7 +43,7 @@ local function setup_compiler_common(tEnv)
   atVars.OBJCOPY_CMD = '"$OBJCOPY" $OBJCOPY_FLAGS $SOURCES $TARGET'
   atVars.OBJCOPY_LABEL = 'Objcopy $TARGET'
   function tEnv:ObjDump(tTarget, tInput, ...)
-    __easyCommand(self, tTarget, tInput, 'OBJDUMP', {...})
+    tEnv:__easyCommand(self, tTarget, tInput, 'OBJDUMP', {...})
   end
 
   atVars.OBJDUMP = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-objdump')
@@ -51,7 +51,7 @@ local function setup_compiler_common(tEnv)
   atVars.OBJDUMP_CMD = '"$OBJDUMP" $OBJDUMP_FLAGS $SOURCES >$TARGET'
   atVars.OBJDUMP_LABEL = 'Objdump $TARGET'
   function tEnv:ObjCopy(tTarget, tInput, ...)
-    __easyCommand(self, tTarget, tInput, 'OBJCOPY', {...})
+    tEnv:__easyCommand(self, tTarget, tInput, 'OBJCOPY', {...})
   end
 end
 

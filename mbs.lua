@@ -23,71 +23,6 @@ local function TableUnlock(tbl)
 end
 
 
---- Update a set of key-value pairs with another set.
---  tTarget: table with key-value pairs which should be updated
---  tInput: table with key-value pairs. Non-string keys will be skipped.
---          value is converted to a string. Tables will be flattened and concatted.
-local function __updateAsStrings(tTarget, tInput)
-  for strKey, tValue in pairs(tInput) do
-    -- Silently skip non-string keys.
-    if type(strKey)=='string' then
-      local strType = type(tValue)
-      if strType=='table' then
-        tValue = table.concat(TableFlatten(tValue), ' ')
-      else
-        tValue = tostring(tValue)
-      end
-      tTarget[strKey] = tValue
-    end
-  end
-end
-
-
-
-local function __easyCommand(tEnv, tTarget, tInput, strToolName, atOverrides)
-  -- Get the absolute path to the target,
-  local strTargetAbs = pl.path.abspath(tTarget)
-  -- Flatten the inputs.
-  local astrInput
-  if type(tInput)=='table' then
-    astrInput = TableFlatten(tInput)
-  else
-    astrInput = {tInput}
-  end
-
-  -- Create a list with all replacement variables.
-  local atReplace = {}
-  -- Start with all variables from the environment.
-  __updateAsStrings(atReplace, tEnv.atVars)
-  -- Add all elements from the optional parameters.
-  __updateAsStrings(atReplace, atOverrides)
-  -- Set the target and sources.
-  atReplace.TARGET = strTargetAbs
-  atReplace.SOURCES = table.concat(astrInput, ' ')
-
-  -- Replace the command.
-  local strCmdVar = strToolName .. '_CMD'
-  local strCmdTemplate = tEnv.atVars[strCmdVar]
-  if strCmdTemplate==nil then
-    local strMsg = string.format('Failed to run tool "%s": no "%s" setting found.', strToolName, strCmdVar)
-    error(strMsg)
-  end
-  local strCmd = string.gsub(strCmdTemplate, '%$([%a_][%w_]+)', atReplace)
-
-  -- Replace the label.
-  local strLabelVar = strToolName .. '_LABEL'
-  local strLabelTemplate = tEnv.atVars[strLabelVar]
-  local strLabel
-  if strLabelTemplate==nil then
-    strLabel = strCmd
-  else
-    strLabel = string.gsub(strLabelTemplate, '%$([%a_][%w_]+)', atReplace)
-  end
-
-  AddJob(strTargetAbs, strLabel, strCmd, astrInput)
-end
-
-
 -------------------------------------------------------------------------------------------------
 --
 -- Global helper functions.
@@ -135,6 +70,72 @@ tEnvDefault.atVars = {}
 
 -- Add a lookup table for the compiler. It maps the compiler ID to a setup function.
 tEnvDefault.atRegisteredCompiler = {}
+
+
+--- Update a set of key-value pairs with another set.
+--  tTarget: table with key-value pairs which should be updated
+--  tInput: table with key-value pairs. Non-string keys will be skipped.
+--          value is converted to a string. Tables will be flattened and concatted.
+function tEnvDefault.__updateAsStrings(tTarget, tInput)
+  for strKey, tValue in pairs(tInput) do
+    -- Silently skip non-string keys.
+    if type(strKey)=='string' then
+      local strType = type(tValue)
+      if strType=='table' then
+        tValue = table.concat(TableFlatten(tValue), ' ')
+      else
+        tValue = tostring(tValue)
+      end
+      tTarget[strKey] = tValue
+    end
+  end
+end
+
+
+
+function tEnvDefault:__easyCommand(tEnv, tTarget, tInput, strToolName, atOverrides)
+  -- Get the absolute path to the target,
+  local strTargetAbs = pl.path.abspath(tTarget)
+  -- Flatten the inputs.
+  local astrInput
+  if type(tInput)=='table' then
+    astrInput = TableFlatten(tInput)
+  else
+    astrInput = {tInput}
+  end
+
+  -- Create a list with all replacement variables.
+  local atReplace = {}
+  -- Start with all variables from the environment.
+  self.__updateAsStrings(atReplace, tEnv.atVars)
+  -- Add all elements from the optional parameters.
+  self.__updateAsStrings(atReplace, atOverrides)
+  -- Set the target and sources.
+  atReplace.TARGET = strTargetAbs
+  atReplace.SOURCES = table.concat(astrInput, ' ')
+
+  -- Replace the command.
+  local strCmdVar = strToolName .. '_CMD'
+  local strCmdTemplate = tEnv.atVars[strCmdVar]
+  if strCmdTemplate==nil then
+    local strMsg = string.format('Failed to run tool "%s": no "%s" setting found.', strToolName, strCmdVar)
+    error(strMsg)
+  end
+  local strCmd = string.gsub(strCmdTemplate, '%$([%a_][%w_]+)', atReplace)
+
+  -- Replace the label.
+  local strLabelVar = strToolName .. '_LABEL'
+  local strLabelTemplate = tEnv.atVars[strLabelVar]
+  local strLabel
+  if strLabelTemplate==nil then
+    strLabel = strCmd
+  else
+    strLabel = string.gsub(strLabelTemplate, '%$([%a_][%w_]+)', atReplace)
+  end
+
+  AddJob(strTargetAbs, strLabel, strCmd, astrInput)
+end
+
 
 --- Add a method to clone the environment.
 function tEnvDefault:Clone()
