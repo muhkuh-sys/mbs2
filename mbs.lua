@@ -139,6 +139,18 @@ function tEnvDefault:__easyCommand(tEnv, tTarget, tInput, strToolName, atOverrid
 end
 
 
+--- Object dump function
+function tEnvDefault:ObjDump(tTarget, tInput, ...)
+  return self:__easyCommand(self, tTarget, tInput, 'OBJDUMP', {...})
+end
+
+
+--- Object copy function
+function tEnvDefault:ObjCopy(tTarget, tInput, ...)
+  return self:__easyCommand(self, tTarget, tInput, 'OBJCOPY', {...})
+end
+
+
 --- Add a method to clone the environment.
 function tEnvDefault:Clone()
   return pl.tablex.deepcopy(self)
@@ -325,8 +337,22 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------
 --
--- Linker extension.
+-- Linker extensions.
 --
+
+
+-- Set the extension of the linker
+function tEnvDefault:SetLinkExtension(strExtension)
+  -- default value
+  strExtension = strExtension or ""
+
+  if type(strExtension) ~= "string" then
+    local strMsg = string.format("The strExtension must be a string.")
+    error(strMsg)
+  end
+  self.link.extension = strExtension
+end
+
 
 -- This is the method for the environment. Users will call this in the "bam.lua" files.
 function tEnvDefault:Link(tTarget, strLdFile, ...)
@@ -350,6 +376,7 @@ TableUnlock(tEnvDefault.link)
 tEnvDefault.link.ldfile = ''
 tEnvDefault.link.mapfile = ''
 tEnvDefault.link.logfile = ''
+tEnvDefault.link.extension = ''
 TableLock(tEnvDefault.link)
 
 
@@ -400,6 +427,17 @@ end
 tEnvDefault.link.Driver = DriverGCC_Link
 
 
+-- Set the extension of the linker
+function tEnvDefault:SetLibPrefix(strPrefix)
+  -- default value
+  strPrefix = strPrefix or ""
+
+  if type(strPrefix) ~= "string"  then
+    local strMsg = string.format("The strPrefix must be a string.")
+    error(strMsg)
+  end
+  self.lib.prefix = strPrefix
+end
 local function DriverGCC_Lib(output, inputs, settings)
   local strCmd = table.concat{
     -- output archive must be removed because ar will update existing archives, possibly leaving stray objects

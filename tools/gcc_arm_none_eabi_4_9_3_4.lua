@@ -41,6 +41,7 @@ local function setup_compiler_common(tEnv)
       '-O0'
     }
   }
+
   local strBuildType = tEnv.atVars.BUILD_TYPE
   local atBuildTypeFlags = atBuildTypes[strBuildType]
   if atBuildTypeFlags==nil then
@@ -69,17 +70,11 @@ local function setup_compiler_common(tEnv)
   atVars.OBJCOPY_FLAGS = {'-O', 'binary'}
   atVars.OBJCOPY_CMD = '"$OBJCOPY" $OBJCOPY_FLAGS $SOURCES $TARGET'
   atVars.OBJCOPY_LABEL = 'Objcopy $TARGET'
-  function tEnv:ObjDump(tTarget, tInput, ...)
-    tEnv:__easyCommand(self, tTarget, tInput, 'OBJDUMP', {...})
-  end
 
   atVars.OBJDUMP = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-objdump')
   atVars.OBJDUMP_FLAGS = {'--all-headers', '--disassemble', '--source'}
   atVars.OBJDUMP_CMD = '"$OBJDUMP" $OBJDUMP_FLAGS $SOURCES >$TARGET'
   atVars.OBJDUMP_LABEL = 'Objdump $TARGET'
-  function tEnv:ObjCopy(tTarget, tInput, ...)
-    tEnv:__easyCommand(self, tTarget, tInput, 'OBJCOPY', {...})
-  end
 end
 
 
