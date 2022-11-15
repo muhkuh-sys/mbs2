@@ -10,10 +10,10 @@ if tEnv==nil then
   -- This is the builder code which does the real work.
   --
   local pl = require'pl.import_into'()
+  local rapidjson = require 'rapidjson'
 
   local strParameter = _bam_targets[0]
 
-  local rapidjson = require 'rapidjson'
   local tParameter, strParameterError = rapidjson.decode(strParameter)
   if tParameter==nil then
     error(string.format('Failed to decode the input parameter "%s": %s', strParameter, strParameterError))
@@ -24,6 +24,7 @@ if tEnv==nil then
     if strInputData==nil then
       error(string.format('Failed to read the input file "%s": %s', tParameter.input, strReadError))
     else
+      -- TODO: use gsub with lpeg - rearange the function to this module
       -- Replace all parameters.
       local strReplaced = string.gsub(strInputData, '%$%{([^}]+)%}', tParameter.replace)
 
@@ -42,28 +43,18 @@ else
   -- Interface
   -- This is the interface code which registers a function in an environment.
   --
+
+  --- global declaration of variables:
   local pl = require'pl.import_into'()
+  local luagit2 = require 'luagit2'
+  local rapidjson = require 'rapidjson'
 
-  function tEnv:Template(strTarget, strInput, atReplacement)
-    local tFilterParameter = {
-      input = pl.path.abspath(strInput),
-      output = pl.path.abspath(strTarget),
-      replace = atReplacement
-    }
-
-    local rapidjson = require 'rapidjson'
-    local strFilterParameter = rapidjson.encode(tFilterParameter, { sort_keys=true })
-    AddJob(
-      tFilterParameter.output,
-      string.format('Template %s', tFilterParameter.input),
-      _bam_exe .. " -e " .. strBuilderPath .. " '" .. strFilterParameter .. "'"
-    )
-    return tFilterParameter.output
-  end
+  -------------------------------------------------------------------------------------------------
+  --
+  -- auxilliary functions.
+  --
 
   local function getGitDescription(strRepositoryPath)
-    local luagit2 = require 'luagit2'
-
     -- Get the VCS version.
     luagit2.init()
 
@@ -102,10 +93,10 @@ else
     local strProjectVersionVcs = 'unknown'
     local strProjectVersionVcsLong = 'unknown'
 
-  --  tLog.debug('Parsing GIT description "%s".', strGitId)
+    print(string.format('Parsing GIT description "%s".', strGitId))
     local tMatch = string.match(strGitId, '^%x%x%x%x%x%x%x%x%x%x%x%x%+?$')
     if tMatch~=nil then
-  --    tLog.debug('This is a repository with no tags. Use the hash.')
+      print(string.format('This is a repository with no tags. Use the hash.'))
       strProjectVersionVcs = strGitId
       strProjectVersionVcsLong = strGitId
     else
@@ -113,16 +104,16 @@ else
       if strVersion~=nil then
         local ulRevsSinceTag = tonumber(strRevsSinceTag)
         if ulRevsSinceTag==0 and strDirty=='' then
-  --        tLog.debug('This is a repository which is exactly on a tag without modification. Use the tag name.')
+          print(string.format('This is a repository which is exactly on a tag without modification. Use the tag name.'))
           strProjectVersionVcs = string.format('v%s%s', strVersion, strDirty)
           strProjectVersionVcsLong = string.format('v%s-%s%s', strVersion, strHash, strDirty)
         else
-  --        tLog.debug('This is a repository with commits after the last tag. Use the hash.')
+          print(string.format('This is a repository with commits after the last tag. Use the hash.'))
           strProjectVersionVcs = string.format('%s%s', strHash, strDirty)
           strProjectVersionVcsLong = string.format('%s%s', strHash, strDirty)
         end
       else
-  --      tLog.debug('The description has an unknown format.')
+        print(string.format('The description has an unknown format.'))
         strProjectVersionVcs = strGitId
         strProjectVersionVcsLong = strGitId
       end
@@ -131,13 +122,38 @@ else
     -- Prepend "GIT" to the VCS ID.
     strProjectVersionVcs = 'GIT' .. strProjectVersionVcs
     strProjectVersionVcsLong = 'GIT' .. strProjectVersionVcsLong
-  --  tLog.debug('PROJECT_VERSION_VCS = "%s"', strProjectVersionVcs)
-  --  tLog.debug('PROJECT_VERSION_VCS_LONG = "%s"', strProjectVersionVcsLong)
+   print(string.format('PROJECT_VERSION_VCS = "%s"', strProjectVersionVcs))
+   print(string.format('PROJECT_VERSION_VCS_LONG = "%s"', strProjectVersionVcsLong))
 
     return strProjectVersionVcs, strProjectVersionVcsLong
   end
 
 
+  -------------------------------------------------------------------------------------------------
+  --
+  -- environment functions.
+  --
+
+
+  --- Given replacements are used for the template
+  function tEnv:Template(strTarget, strInput, atReplacement)
+    local tFilterParameter = {
+      input = pl.path.abspath(strInput),
+      output = pl.path.abspath(strTarget),
+      replace = atReplacement
+    }
+
+    local strFilterParameter = rapidjson.encode(tFilterParameter, { sort_keys=true })
+    AddJob(
+      tFilterParameter.output, -- outputs
+      string.format('Template %s', tFilterParameter.input), -- label
+      _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strFilterParameter}) -- cmd
+    )
+    return tFilterParameter.output
+  end
+
+
+  --- The version and VCS are used as replacements (plus extra replacements) for the template
   function tEnv:VersionTemplate(strTarget, strInput, atExtraReplacements)
     local strGitDescription = getGitDescription('.')
     local strProjectVersionVcs, strProjectVersionVcsLong = parseGitID(strGitDescription)
@@ -166,12 +182,11 @@ else
       replace = atReplacement
     }
 
-    local rapidjson = require 'rapidjson'
     local strFilterParameter = rapidjson.encode(tFilterParameter, { sort_keys=true })
     AddJob(
-      tFilterParameter.output,
-      string.format('VersionTemplate %s', tFilterParameter.input),
-      _bam_exe .. " -e " .. strBuilderPath .. " '" .. strFilterParameter .. "'"
+      tFilterParameter.output, -- output
+      string.format('VersionTemplate %s', tFilterParameter.input), -- label
+      _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strFilterParameter}) -- cmd
     )
     return tFilterParameter.output
   end
