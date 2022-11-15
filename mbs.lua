@@ -57,13 +57,33 @@ end
 --
 -- Create the default environment.
 --
+
+
+-- Provide Penlight as an upvalue to all functions.
+local pl = require'pl.import_into'()
+
+-- create default environment
 local tEnvDefault = NewSettings()
 
 -- Unlock the settings table. This allows the creation of new keys.
 TableUnlock(tEnvDefault)
 
--- Provide Penlight as an upvalue to all functions.
-local pl = require'pl.import_into'()
+
+-- Add default Cmd templates:
+local tDefaultSettings =
+{
+  READELF = "readelf", -- default readelf cmd
+  OBJDUMP = "objdump"  -- default objdump cmd
+}
+
+tEnvDefault.atCmdTemplates = {}
+
+for strKey,tValue in pairs(tDefaultSettings) do
+  if tEnvDefault.atCmdTemplates[strKey] == nil then
+    tEnvDefault.atCmdTemplates[strKey] = tValue
+  end
+end
+
 
 -- Add a table for general key/value pairs. They can be set during the build process to add extra information.
 tEnvDefault.atVars = {}
@@ -92,7 +112,7 @@ function tEnvDefault.__updateAsStrings(tTarget, tInput)
 end
 
 
-
+---
 function tEnvDefault:__easyCommand(tEnv, tTarget, tInput, strToolName, atOverrides)
   -- Get the absolute path to the target,
   local strTargetAbs = pl.path.abspath(tTarget)
@@ -157,6 +177,7 @@ function tEnvDefault:Clone()
 end
 
 
+---
 function tEnvDefault:CreateEnvironment(astrTools)
   local tEnv = self:Clone()
 
@@ -212,6 +233,7 @@ function tEnvDefault:CreateEnvironment(astrTools)
 end
 
 
+---
 function tEnvDefault:AddBuilder(strBuilder)
   -- Try to load the builder script.
   local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
@@ -233,6 +255,7 @@ function tEnvDefault:AddBuilder(strBuilder)
 end
 
 
+---
 function tEnvDefault:AddCompiler(strCompilerID, strAsicTyp)
   -- By default the ASIC typ is the compiler ID.
   strAsicTyp = strAsicTyp or strCompilerID
@@ -288,6 +311,7 @@ function tEnvDefault:SetBuildPath(strSourcePath, strOutputPath)
 end
 
 
+---
 function tEnvDefault:AddInclude(...)
   local tIn = TableFlatten{...}
   for _, tSrc in ipairs(tIn) do
@@ -296,11 +320,13 @@ function tEnvDefault:AddInclude(...)
 end
 
 
+---
 function tEnvDefault:AddCCFlags(...)
   self.cc.flags:Merge( TableFlatten{...} )
 end
 
 
+---
 function tEnvDefault:AddDefines(...)
   local tIn = TableFlatten{...}
   for _, tSrc in ipairs(tIn) do
@@ -309,6 +335,7 @@ function tEnvDefault:AddDefines(...)
 end
 
 
+---
 function tEnvDefault:Compile(...)
   local tIn = TableFlatten{...}
   local atSrc = {}
@@ -319,7 +346,7 @@ function tEnvDefault:Compile(...)
 end
 
 
-
+---
 function tEnvDefault:StaticLibrary(tTarget, ...)
   local tIn = TableFlatten{...}
   local atSrc = {}
@@ -328,7 +355,6 @@ function tEnvDefault:StaticLibrary(tTarget, ...)
   end
   return StaticLibrary(self, pl.path.abspath(tTarget), atSrc)
 end
-
 
 
 ---------------------------------------------------------------------------------------------------------------------
@@ -366,7 +392,6 @@ function tEnvDefault:Link(tTarget, strLdFile, ...)
 end
 
 
-
 -- Extend the linker settings with an entry for the LD and a map file.
 TableUnlock(tEnvDefault.link)
 tEnvDefault.link.ldfile = ''
@@ -376,7 +401,7 @@ tEnvDefault.link.extension = ''
 TableLock(tEnvDefault.link)
 
 
--- Extend the
+-- Extend the link driver
 local function DriverGCC_Link(label, output, inputs, settings)
   -- Prepare the optional LD file option.
   local strLdOption = ''
@@ -423,6 +448,12 @@ end
 tEnvDefault.link.Driver = DriverGCC_Link
 
 
+---------------------------------------------------------------------------------------------------------------------
+--
+-- Lib extensions.
+--
+
+
 -- Set the extension of the linker
 function tEnvDefault:SetLibPrefix(strPrefix)
   -- default value
@@ -434,6 +465,9 @@ function tEnvDefault:SetLibPrefix(strPrefix)
   end
   self.lib.prefix = strPrefix
 end
+
+
+--- Extend the lib driver
 local function DriverGCC_Lib(output, inputs, settings)
   local strCmd = table.concat{
     -- output archive must be removed because ar will update existing archives, possibly leaving stray objects
@@ -445,8 +479,17 @@ end
 tEnvDefault.lib.Driver = DriverGCC_Lib
 
 
--- Add some common builder.
+---------------------------------------------------------------------------------------------------------------------
+--
+-- Add some builder.
+--
+
+
+-- Add template builder.
 tEnvDefault:AddBuilder('mbs2/builder/template.lua')
+
+-- Add GccSymbolTemplate builder
+tEnvDefault:AddBuilder('mbs2/builder/gcc_symbol_template.lua')
 
 
 
