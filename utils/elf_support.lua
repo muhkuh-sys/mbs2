@@ -3,73 +3,45 @@ local tElf_Support = {}
 
 local pl = require'pl.import_into'()
 
+-- TODO change by using of package path
+local function GetModule(strBuilder)
+  -- Try to load the builder script.
+  local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
+  if strBuilderScript==nil then
+    local strMsg = string.format('Failed to read script "%s": %s', strBuilder, strError)
+    error(strMsg)
+  end
 
----------------------------------------------------------------------------------------------------------------------
---
--- Pattern and auxiliary functions of lpeg
---
+  -- Run the script.
+  local tChunk, strError = pl.compat.load(strBuilderScript, strBuilder, 't')
+  if tChunk==nil then
+    local strMsg = string.format('Failed to parse script "%s": %s', strBuilder, strError)
+    error(strMsg)
+  end
 
---- Init lpeg
+  local bStatus, tResult = pcall(tChunk)
+  if bStatus==nil then
+    local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
+    error(strMsg)
+  end
+
+  return tResult
+end
+
+-- TODO change by using of package path
+local strLpeg_Support = "mbs2/utils/lpeg_support.lua"
+local tLpeg_Support =  GetModule(strLpeg_Support)
+
 local lpeg = require "lpeglabel"
 
--- Save typing function names with "lpeg" in front of them:
-local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs
-
-
--- Match optional whitespace.
-local OptionalSpace = S(" \t") ^ 0
-local Space = S(" \t") ^ 1
-local Comma = P(",")
-
-
--- Auxiliary function: add spaces around pattern
-local Spaces = function(Pattern)
-  return Space * Pattern * Space
-end
-
-
--- Auxiliary function: add optinal spaces around pattern
-local OptSpace = function(Pattern)
-  return OptionalSpace * Pattern * OptionalSpace
-end
-
-
--- Auxiliary function: match everything up to the pattern (return a caption)
-local UpTo = function(SEARCH_PATTERN,END_PATTERN,strSearchPattern,fCapture)
-  fCapture = fCapture or nil
-  if fCapture ~= nil and type(fCapture) == "function" then
-    return Cg((SEARCH_PATTERN - (END_PATTERN)) ^ 1 / fCapture,strSearchPattern) * END_PATTERN
-  else
-    return Cg((SEARCH_PATTERN - (END_PATTERN)) ^ 1,strSearchPattern) * END_PATTERN
-  end
-end
-
-
--- Auxiliary function: return a grammar which tries to match the given pattern in a string
-local Anywhere = function(Pattern)
-  return P {Pattern + 1 * lpeg.V(1)}
-end
-
-
--- Auxiliary function: list-pattern with separator
-local List = function(Pattern, Sep)
-  return C(Pattern) * (Sep * C(Pattern)) ^ 0
-end
-
-
--- Auxiliary function: Create an either or pattern of the table entries
-local SetEitherOrPattern = function(tSearchingPattern)
-  local Pattern = nil
-  for _,strValue in ipairs(tSearchingPattern) do
-    if Pattern == nil then
-      Pattern = P(strValue)
-    else
-      Pattern = Pattern + P(strValue)
-    end
-  end
-  return Pattern
-end
-
+-- Save typing:
+local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs, match,
+OptionalSpace,Space,Comma,
+Spaces,OptSpace,UpTo,Anywhere,List,SetEitherOrPattern,Gsub =
+lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs, lpeg.match,
+tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma,
+tLpeg_Support.Spaces,tLpeg_Support.OptSpace,tLpeg_Support.UpTo,tLpeg_Support.Anywhere,
+tLpeg_Support.List,tLpeg_Support.SetEitherOrPattern,tLpeg_Support.Gsub
 
 ---------------------------------------------------------------------------------------------------------------------
 --
@@ -105,7 +77,7 @@ local function executeCmd(tCmd)
   tCmd.FLAGS = (type(tCmd.FLAGS) == "table") and table.concat(tCmd.FLAGS,' ') or tCmd.FLAGS
 
   local strCMD_TEMPLATE = "${CMD} ${FLAGS} ${SOURCE}"
-  local strCmd = tElf_Support:gsub(strCMD_TEMPLATE,tCmd)
+  local strCmd = tLpeg_Support.Gsub(strCMD_TEMPLATE,tCmd)
 
   local fResult,strReturnCode,strStdout,strError = pl.utils.executeex(strCmd)
   if fResult ~= true then
@@ -148,47 +120,6 @@ end
 --
 -- Module functions of Elf_Support
 --
-
-
--- Auxiliary function: Replace templates in a string with given replacement(s)
- function tElf_Support:gsub(strTemplate,tReplacements,TEMPLATE_PATTERN)
-  local fReplace = function(tmatch)
-    local strResult
-    if type(tReplacements) == "table" then
-      if tReplacements[tmatch] == nil then
-        local strMsg = string.format("ERROR: Missing symbol:'%s' in the replacement table. ",tmatch)
-        error(strMsg)
-      end
-      strResult = tReplacements[tmatch]
-    elseif type(tReplacements) == "string" then
-      strResult = tReplacements
-    end
-
-    return strResult
-  end
-
-  TEMPLATE_PATTERN = TEMPLATE_PATTERN or P"${" * C((P(1) - P"}")^0) * P"}"
-  local Substitution =
-  Cs(
-    P{
-      "start", --> this tells LPEG which rule to process first
-      start     = (V"template" + 1* V"start")^0,
-      template  = TEMPLATE_PATTERN / fReplace
-    }
-  )
-
-  local strOutput
-  for strLine in pl.stringx.lines(strTemplate) do
-    local strTemp = Substitution:match(strLine)
-    if strOutput == nil then
-      strOutput = strTemp
-    else
-      strOutput = strOutput .. "\n" .. strTemp
-    end
-  end
-
-  return strOutput
-end
 
 
 --- extract "Entry point address" from elf file header.

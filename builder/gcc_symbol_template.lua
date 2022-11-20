@@ -28,6 +28,7 @@ if tEnv==nil then
     end
   end
 
+  -- TODO change by using of package path
   local function GetModule(strBuilder)
     -- Try to load the builder script.
     local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
@@ -43,14 +44,23 @@ if tEnv==nil then
       error(strMsg)
     end
 
-    local tObj = tChunk()
+    local bStatus, tResult = pcall(tChunk)
+    if bStatus==nil then
+      local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
+      error(strMsg)
+    end
 
-    return tObj
+    return tResult
   end
 
+
+-- TODO change by using of package path
   -- path of the auxilliary module: "Elf_Support"
-  local strElf_Support = "mbs2/builder/elf_support.lua"
-  local tElf_Support = GetModule(strElf_Support)
+  local strElf_Support = "mbs2/utils/elf_support.lua"
+  local strLpeg_Support = "mbs2/utils/lpeg_support.lua"
+  -- package.path = 'mbs2/utils/?.lua;mbs2/utils/?/init.lua;' .. package.path
+  local tElf_Support =  GetModule(strElf_Support) -- require "elf_support"
+  local tLpeg_Support =  GetModule(strLpeg_Support)
 
   -- input arg BAM
   local strParameter = _bam_targets[0]
@@ -89,7 +99,7 @@ if tEnv==nil then
     local strLoadAddress = string.format("0x%08x",ulLoadAddress)
     copy_table(atSymbols,{["%LOAD_ADDRESS%"] = strLoadAddress})
 
-    --TODO:  Add here: "Search and replace the special "%PROGRAM_DATA%"."
+    --TODO:  Add here: "Search and replace the special "%PROGRAM_DATA%" pattern."
 
     -- Read the template.
     local strTemplate, strError = pl.utils.readfile(strGCC_Symbol_Template, false)
@@ -98,9 +108,8 @@ if tEnv==nil then
       error(strMsg)
     end
 
-    --TODO: rearange the function to this module
     -- Replace all symbols in the template.
-    local strResult = tElf_Support:gsub(strTemplate,atSymbols)
+    local strResult = tLpeg_Support.Gsub(strTemplate,atSymbols)
 
     -- Write the result.
     local tWriteResult, strWriteError = pl.utils.writefile(tParameter.strOutput, strResult, true)
