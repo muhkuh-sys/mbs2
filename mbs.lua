@@ -1,5 +1,15 @@
--- Add the MBS "tools" folder to the LUA search path.
-package.path = 'mbs2/tools/?.lua;mbs2/tools/?/init.lua;' .. package.path
+-- Add the MBS "tools","builder" and "utils" folder to the LUA search path.
+--TODO: replace by using of "import_mbs" module (see TODO list)
+local tAddPaths =
+{
+  strToolsPath = 'mbs2/tools/?.lua;mbs2/tools/?/init.lua;',
+  strBuilderPath = 'mbs2/builder/?.lua;mbs2/builder/?/init.lua;',
+  strUtilsPath = 'mbs2/utils/?.lua;mbs2/utils/?/init.lua;'
+}
+
+for _,strPath in pairs(tAddPaths) do
+  package.path = strPath .. package.path
+end
 
 -----------------------------------------------------------------------------
 --
@@ -47,7 +57,13 @@ function SubBAM(strPath)
   if tChunk==nil then
     error(string.format('SubBAM failed to parse script "%s": %s', strPath, strError))
   end
-  tChunk()
+
+  local bStatus, tResult = pcall(tChunk)
+  if bStatus==nil then
+    local strMsg = string.format('Failed to call the script "%s": %s', strSubScript, tResult)
+    error(strMsg)
+  end
+
   -- Restore the old working folder.
   path.chdir(strOldWorkingDirectory)
 end
@@ -225,7 +241,15 @@ function tEnvDefault:CreateEnvironment(astrTools)
     end
     -- Unlock the table as some tools add functions
 --    TableUnlock(tEnv)
-    tChunk(tEnv, strPath)
+    local fChunk = function()
+      tChunk(tEnv, strPath)
+    end
+
+    local bStatus, tResult = pcall(fChunk)
+    if bStatus==nil then
+      local strMsg = string.format('Failed to call the script "%s": %s', strPath, tResult)
+      error(strMsg)
+    end
 --    TableLock(tEnv)
   end
 
@@ -246,9 +270,18 @@ function tEnvDefault:AddBuilder(strBuilder)
   if tChunk==nil then
     error(string.format('Failed to parse script "%s": %s', strBuilder, strError))
   end
+  --TODO: pcall hinzufügen?
   -- Unlock the table as some tools add functions
 --  TableUnlock(tEnv)
-  tChunk(self, strBuilder)
+    local fChunk = function()
+      tChunk(self, strBuilder)
+    end
+
+    local bStatus, tResult = pcall(fChunk)
+    if bStatus==nil then
+      local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
+      error(strMsg)
+    end
 --  TableLock(tEnv)
 
   return self
