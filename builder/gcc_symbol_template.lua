@@ -140,8 +140,8 @@ else
       strGCC_Symbol_Binfile  = (strGCC_Symbol_Binfile == nil) and "" or pl.path.abspath(strGCC_Symbol_Binfile), -- TODO: add %PROGRAM_DATA%"
       tEnvCmdTemplates =
       {
-        READELF = self.atCmdTemplates.READELF,
-        OBJDUMP = self.atCmdTemplates.OBJDUMP
+        READELF = self.atVars["DefaultSettings"].READELF,
+        OBJDUMP = self.atVars["DefaultSettings"].OBJDUMP
       }
     }
 
@@ -149,7 +149,7 @@ else
 
     AddJob(
       tParameter.strOutput, -- output
-      string.format('GCC_Symbol_Template %s', tParameter.strSourceElf), -- label
+      string.format('GCC_Symbol_Template %s', tParameter.strOutput), -- label
       _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strParameter}) -- cmd
     )
     AddDependency(tParameter.strOutput, tParameter.strSourceElf) -- neccessary

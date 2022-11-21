@@ -84,25 +84,20 @@ local tEnvDefault = NewSettings()
 -- Unlock the settings table. This allows the creation of new keys.
 TableUnlock(tEnvDefault)
 
-
--- Add default Cmd templates:
-local tDefaultSettings =
-{
-  READELF = "readelf", -- default readelf cmd
-  OBJDUMP = "objdump"  -- default objdump cmd
-}
-
-tEnvDefault.atCmdTemplates = {}
-
-for strKey,tValue in pairs(tDefaultSettings) do
-  if tEnvDefault.atCmdTemplates[strKey] == nil then
-    tEnvDefault.atCmdTemplates[strKey] = tValue
-  end
-end
-
-
 -- Add a table for general key/value pairs. They can be set during the build process to add extra information.
 tEnvDefault.atVars = {}
+
+-- Add default settings:
+local tDefaultSettings =
+{
+  READELF = "readelf", -- default readelf cmd for elf support
+  OBJDUMP = "objdump",  -- default objdump cmd for elf support
+  INTERPRETER_HBOOT = "python2.7",
+  PATH_HBOOT = "mbs2/hboot_image_compiler/hboot_image_compiler"
+}
+
+tEnvDefault.atVars["DefaultSettings"] = tDefaultSettings
+
 
 -- Add a lookup table for the compiler. It maps the compiler ID to a setup function.
 tEnvDefault.atRegisteredCompiler = {}
