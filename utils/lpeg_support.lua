@@ -75,7 +75,9 @@ end
 
 
 -- Auxiliary function: Replace templates in a string with given replacement(s)
-function tLpeg_Support.Gsub(strTemplate,tReplacements,TEMPLATE_PATTERN)
+function tLpeg_Support.Gsub(strTemplate,TEMPLATE_PATTERN,tReplacements)
+  TEMPLATE_PATTERN = TEMPLATE_PATTERN or P"${" * C((P(1) - P"}")^0) * P"}"
+
   local fReplace = function(tmatch)
     local strResult
     if type(tReplacements) == "table" then
@@ -91,7 +93,6 @@ function tLpeg_Support.Gsub(strTemplate,tReplacements,TEMPLATE_PATTERN)
     return strResult
   end
 
-  TEMPLATE_PATTERN = TEMPLATE_PATTERN or P"${" * C((P(1) - P"}")^0) * P"}"
   local Substitution = Cs((TEMPLATE_PATTERN / fReplace + 1)^0)
 
   -- with recursive pattern, a limit of max stack (max numb of symbols) can be reached (lpeg.setmaxstack, default = 400).

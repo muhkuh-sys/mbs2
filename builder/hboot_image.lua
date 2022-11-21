@@ -79,7 +79,7 @@ else
     }
 
     local strCMD_TEMPLATE = "${INTERPRETER_HBOOT} ${PATH_HBOOT} ${FLAGS} ${HBOOT_DEFINITION} ${TARGET}"
-    local strCMD = tLpeg_Support.Gsub(strCMD_TEMPLATE,tCMD)
+    local strCMD = tLpeg_Support.Gsub(strCMD_TEMPLATE,nil,tCMD)
 
     AddJob(
       strTarget,

@@ -77,7 +77,7 @@ local function executeCmd(tCmd)
   tCmd.FLAGS = (type(tCmd.FLAGS) == "table") and table.concat(tCmd.FLAGS,' ') or tCmd.FLAGS
 
   local strCMD_TEMPLATE = "${CMD} ${FLAGS} ${SOURCE}"
-  local strCmd = tLpeg_Support.Gsub(strCMD_TEMPLATE,tCmd)
+  local strCmd = tLpeg_Support.Gsub(strCMD_TEMPLATE,nil,tCmd)
 
   local fResult,strReturnCode,strStdout,strError = pl.utils.executeex(strCmd)
   if fResult ~= true then
