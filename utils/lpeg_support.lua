@@ -94,6 +94,16 @@ function tLpeg_Support.Gsub(strTemplate,tReplacements,TEMPLATE_PATTERN)
   TEMPLATE_PATTERN = TEMPLATE_PATTERN or P"${" * C((P(1) - P"}")^0) * P"}"
   local Substitution = Cs((TEMPLATE_PATTERN / fReplace + 1)^0)
 
+  -- with recursive pattern, a limit of max stack (max numb of symbols) can be reached (lpeg.setmaxstack, default = 400).
+  --[[
+  local Substitution =
+  Cs(
+    P{
+      "start", --> this tells LPEG which rule to process first
+      start     = (V"template" + 1* V"start")^0,
+      template  = TEMPLATE_PATTERN / fReplace
+    }
+  )
   local strOutput
   for strLine in pl.stringx.lines(strTemplate) do
     local strTemp = Substitution:match(strLine)
@@ -105,6 +115,9 @@ function tLpeg_Support.Gsub(strTemplate,tReplacements,TEMPLATE_PATTERN)
   end
 
   return strOutput
+  --]]
+
+  return Substitution:match(strTemplate)
 end
 
 
