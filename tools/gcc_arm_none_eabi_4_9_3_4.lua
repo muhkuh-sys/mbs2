@@ -72,7 +72,7 @@ local function setup_compiler_common(tEnv)
   atVars.OBJCOPY_LABEL = 'Objcopy $TARGET'
 
   atVars.OBJDUMP = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-objdump')
-  atVars.OBJDUMP_FLAGS = {'--all-headers', '--disassemble', '--source'}
+  atVars.OBJDUMP_FLAGS = {'--all-headers', '--disassemble', '--source',"--wide"}
   atVars.OBJDUMP_CMD = '"$OBJDUMP" $OBJDUMP_FLAGS $SOURCES >$TARGET'
   atVars.OBJDUMP_LABEL = 'Objdump $TARGET'
 end
