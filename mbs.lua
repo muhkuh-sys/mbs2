@@ -519,6 +519,8 @@ tEnvDefault:AddBuilder('mbs2/builder/template.lua')
 -- Add GccSymbolTemplate builder
 tEnvDefault:AddBuilder('mbs2/builder/gcc_symbol_template.lua')
 
+-- Add hboot_image builder
+tEnvDefault:AddBuilder('mbs2/builder/hboot_image.lua')
 
 
 -- Finally lock the table again.
