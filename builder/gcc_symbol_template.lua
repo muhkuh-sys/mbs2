@@ -13,6 +13,13 @@ if tEnv==nil then
   local pl = require'pl.import_into'()
   local rapidjson = require 'rapidjson'
 
+  -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
+  local mbs2 = require "import_mbs"()
+
+  local tElf_Support =  require "elf_support"
+  local tLpeg_Support =  require "lpeg_support"
+
+
   -- copy data from table 1 to table 2 - check double entries
   local function copy_table(table_1,table_2)
     for strKey,tValue in pairs(table_2) do
@@ -27,40 +34,6 @@ if tEnv==nil then
       table_1[strKey] = tValue
     end
   end
-
-  -- TODO change by using of package path
-  local function GetModule(strBuilder)
-    -- Try to load the builder script.
-    local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
-    if strBuilderScript==nil then
-      local strMsg = string.format('Failed to read script "%s": %s', strBuilder, strError)
-      error(strMsg)
-    end
-
-    -- Run the script.
-    local tChunk, strError = pl.compat.load(strBuilderScript, strBuilder, 't')
-    if tChunk==nil then
-      local strMsg = string.format('Failed to parse script "%s": %s', strBuilder, strError)
-      error(strMsg)
-    end
-
-    local bStatus, tResult = pcall(tChunk)
-    if bStatus==nil then
-      local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
-      error(strMsg)
-    end
-
-    return tResult
-  end
-
-
--- TODO change by using of package path
-  -- path of the auxilliary module: "Elf_Support"
-  local strElf_Support = "mbs2/utils/elf_support.lua"
-  local strLpeg_Support = "mbs2/utils/lpeg_support.lua"
-  -- package.path = 'mbs2/utils/?.lua;mbs2/utils/?/init.lua;' .. package.path
-  local tElf_Support =  GetModule(strElf_Support) -- require "elf_support"
-  local tLpeg_Support =  GetModule(strLpeg_Support)
 
   -- input arg BAM
   local strParameter = _bam_targets[0]
@@ -137,7 +110,8 @@ else
       strSourceElf           = pl.path.abspath(strSourceElf),
       strOutput              = pl.path.abspath(strTarget),
       strGCC_Symbol_Template = pl.path.abspath(strGCC_Symbol_Template),
-      strGCC_Symbol_Binfile  = (strGCC_Symbol_Binfile == nil) and "" or pl.path.abspath(strGCC_Symbol_Binfile), -- TODO: add %PROGRAM_DATA%"
+      strGCC_Symbol_Binfile  = (strGCC_Symbol_Binfile == nil) and "" or pl.path.abspath(strGCC_Symbol_Binfile),
+      -- TODO: add %PROGRAM_DATA%"
       tEnvCmdTemplates =
       {
         READELF = self.atVars["DefaultSettings"].READELF,

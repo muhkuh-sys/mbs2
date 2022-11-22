@@ -3,35 +3,10 @@ local tElf_Support = {}
 
 local pl = require'pl.import_into'()
 
--- TODO change by using of package path
-local function GetModule(strBuilder)
-  -- Try to load the builder script.
-  local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
-  if strBuilderScript==nil then
-    local strMsg = string.format('Failed to read script "%s": %s', strBuilder, strError)
-    error(strMsg)
-  end
+-- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
+local mbs2 = require "import_mbs"()
 
-  -- Run the script.
-  local tChunk, strError = pl.compat.load(strBuilderScript, strBuilder, 't')
-  if tChunk==nil then
-    local strMsg = string.format('Failed to parse script "%s": %s', strBuilder, strError)
-    error(strMsg)
-  end
-
-  local bStatus, tResult = pcall(tChunk)
-  if bStatus==nil then
-    local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
-    error(strMsg)
-  end
-
-  return tResult
-end
-
--- TODO change by using of package path
-local strLpeg_Support = "mbs2/utils/lpeg_support.lua"
-local tLpeg_Support =  GetModule(strLpeg_Support)
-
+local tLpeg_Support = require "lpeg_support"
 local lpeg = require "lpeglabel"
 
 -- Save typing:

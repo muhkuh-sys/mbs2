@@ -17,7 +17,19 @@
 		<dependency group="com.github.sqmedeiros" module="lpeglabel" artifact="lua5.4-lpeglabel" version="1"/>
 	</dependencies>
 	<actions>
-		<action name="pack" path="${install_base}">
+		<action name="pack" path="${prj_root}">
+			local t = ...
+
+			-- local pl = t.pl
+			-- pl.pretty.dump(getmetatable(t))
+			-- pl.pretty.dump(t)
+			-- pl.pretty.dump(t.atReplacements)
+
+			-- Copy all jonchki scripts.
+			t:install{
+				['mbs2/local/import_mbs.lua']                                  = '${install_lua_path}/',
+			}
+
 			return true
 		</action>
 	</actions>

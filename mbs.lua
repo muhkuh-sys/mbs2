@@ -1,15 +1,8 @@
--- Add the MBS "tools","builder" and "utils" folder to the LUA search path.
---TODO: replace by using of "import_mbs" module (see TODO list)
-local tAddPaths =
-{
-  strToolsPath = 'mbs2/tools/?.lua;mbs2/tools/?/init.lua;',
-  strBuilderPath = 'mbs2/builder/?.lua;mbs2/builder/?/init.lua;',
-  strUtilsPath = 'mbs2/utils/?.lua;mbs2/utils/?/init.lua;'
-}
+-- Provide Penlight as an upvalue to all functions.
+local pl = require'pl.import_into'()
 
-for _,strPath in pairs(tAddPaths) do
-  package.path = strPath .. package.path
-end
+-- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
+local mbs2 = require "import_mbs"()
 
 -----------------------------------------------------------------------------
 --
@@ -73,10 +66,6 @@ end
 --
 -- Create the default environment.
 --
-
-
--- Provide Penlight as an upvalue to all functions.
-local pl = require'pl.import_into'()
 
 -- create default environment
 local tEnvDefault = NewSettings()
