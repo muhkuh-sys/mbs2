@@ -66,14 +66,19 @@ else
         local strMsg = string.format('Error: The argument "%s" has the wrong type.', strArg)
         error(strMsg)
       end
+    end
 
+    -- to prevent rebuiling by BAM
+    local strArguments = ""
+    for _,strValue in pl.tablex.sortv(atArguments) do
+      strArguments = strArguments .. " " .. strValue
     end
 
     local tCMD =
     {
       INTERPRETER_HBOOT = self.atVars["DefaultSettings"].INTERPRETER_HBOOT,
       PATH_HBOOT = self.atVars["DefaultSettings"].PATH_HBOOT,
-      FLAGS = table.concat(atArguments," "),
+      FLAGS = strArguments, --table.concat(atArguments_sort," "),
       HBOOT_DEFINITION = strHbootDefinition,
       TARGET = strTarget,
     }
