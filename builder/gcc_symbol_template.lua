@@ -82,7 +82,7 @@ if tEnv==nil then
     end
 
     -- Replace all symbols in the template.
-    local strResult = tLpeg_Support.Gsub(strTemplate,atSymbols)
+    local strResult = tLpeg_Support.Gsub(strTemplate,nil,atSymbols)
 
     -- Write the result.
     local tWriteResult, strWriteError = pl.utils.writefile(tParameter.strOutput, strResult, true)
