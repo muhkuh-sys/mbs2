@@ -24,10 +24,10 @@ if tEnv == nil then
     error(strMsg)
   end
 
-  local strArchivePath,uiFormat_Archive,tFilter_Archive,tResolvedArchiveStructure =
+  local strArchivePath,uiFormat,tFilterNumb,tResolvedArchiveStructure =
     tParameter.strArchivePath,
-    tParameter.uiFormat_Archive,
-    tParameter.tFilter_Archive,
+    tParameter.uiFormat,
+    tParameter.tFilterNumb,
     tParameter.tResolvedArchiveStructure
 
   -------------------------------------------------------------------------------------------------------------------
@@ -68,14 +68,14 @@ if tEnv == nil then
   local tArchive = archive.ArchiveWrite()
 
   -- set format
-  tArcResult = tArchive:set_format(uiFormat_Archive)
+  tArcResult = tArchive:set_format(uiFormat)
   if tArcResult ~= 0 then
-    local strMsg = string.format('ERROR: Failed to set the archive format to ID %d: %s', uiFormat_Archive, tArchive:error_string())
+    local strMsg = string.format('ERROR: Failed to set the archive format to ID %d: %s', uiFormat, tArchive:error_string())
     error(strMsg)
   end
 
   -- set filter
-  for _, uiFilter in ipairs(tFilter_Archive) do
+  for _, uiFilter in ipairs(tFilterNumb) do
     tArcResult = tArchive:add_filter(uiFilter)
     if tArcResult ~= 0 then
       local strMsg = string.format('ERROR: Failed to add filter with ID %d: %s', uiFilter, tArchive:error_string())
@@ -275,8 +275,10 @@ else
       error(strMsg)
     end
 
-    if tFilter ~= nil or type(tFilter) == "string" then
+    if tFilter ~= nil and type(tFilter) == "string" then
       tFilter = {tFilter}
+    elseif tFilter == nil then
+      tFilter = {}
     elseif not (tFilter == nil or type(tFilter) == "table") then
       local strMsg = string.format('ERROR: The input parameter "tFilter" must be nil or a table.')
       error(strMsg)
@@ -309,12 +311,20 @@ else
       )
       error(strMsg)
     end
-    local uiFormat_Archive = atFormat_Archive[string.upper(strFormat)]
+    local uiFormat = atFormat_Archive[string.upper(strFormat)]
 
     -- check, whether the filter input parameters are available in the archive object
-    local tFilter_Archive = {}
-    if tFilter ~= nil then
+    local tFilterNumb = {}
+    if tFilter ~= nil and type(tFilter) == "table" and next(tFilter) ~= nil then
       for uiKey,strFilter in ipairs(tFilter) do
+        if type(strFilter) ~= "string" then
+          local strMsg = string.format('ERROR: The input parameter "tFilter" must have string value entries.')
+          error(strMsg)
+        elseif type(uiKey) ~= "number" then
+          local strMsg = string.format('ERROR: The input parameter "tFilter" must have number key entries.')
+          error(strMsg)
+        end
+
         if atFilter_Archive[string.upper(strFilter)] == nil then
           local strMsg = string.format('ERROR: The filter "%s" is not available in the archive object. The following options of the filter are possible:\n"%s"',
           strFilter,
@@ -322,9 +332,10 @@ else
         )
           error(strMsg)
         end
-        tFilter_Archive[uiKey] = atFilter_Archive[string.upper(strFormat)]
+        tFilterNumb[uiKey] = atFilter_Archive[string.upper(strFormat)]
       end
     end
+
 
     if tArchiveStructure == nil or type(tArchiveStructure) ~= "table" then
       local strMsg = string.format('ERROR: The input parameter "tArchiveStructure" must be a table.')
@@ -340,8 +351,8 @@ else
     local tParameter =
     {
       strArchivePath            = pl.path.abspath(strArchivePath),
-      uiFormat_Archive          = uiFormat_Archive,
-      tFilter_Archive           = tFilter_Archive,
+      uiFormat                  = uiFormat,
+      tFilterNumb               = tFilterNumb,
       tResolvedArchiveStructure = tResolvedArchiveStructure,
     }
 
