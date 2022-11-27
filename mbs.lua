@@ -245,16 +245,15 @@ end
 function tEnvDefault:AddBuilder(strBuilder)
   -- Try to load the builder script.
   local strBuilderScript, strError = pl.utils.readfile(strBuilder, false)
-  if strBuilderScript==nil then
+  if strBuilderScript == nil then
     error(string.format('Failed to read script "%s": %s', strBuilder, strError))
   end
 
   -- Run the script.
   local tChunk, strError = pl.compat.load(strBuilderScript, strBuilder, 't')
-  if tChunk==nil then
+  if tChunk == nil then
     error(string.format('Failed to parse script "%s": %s', strBuilder, strError))
   end
-  --TODO: pcall hinzufügen?
   -- Unlock the table as some tools add functions
 --  TableUnlock(tEnv)
     local fChunk = function()
@@ -262,7 +261,7 @@ function tEnvDefault:AddBuilder(strBuilder)
     end
 
     local bStatus, tResult = pcall(fChunk)
-    if bStatus==nil then
+    if bStatus == nil then
       local strMsg = string.format('Failed to call the script "%s": %s', strBuilder, tResult)
       error(strMsg)
     end
@@ -510,6 +509,9 @@ tEnvDefault:AddBuilder('mbs2/builder/gcc_symbol_template.lua')
 
 -- Add hboot_image builder
 tEnvDefault:AddBuilder('mbs2/builder/hboot_image.lua')
+
+-- Add archive builder
+tEnvDefault:AddBuilder('mbs2/builder/mbs_archive.lua')
 
 
 -- Finally lock the table again.

@@ -15,6 +15,12 @@
 		<dependency group="com.github.xpol" module="lua-rapidjson" artifact="lua5.4-lua-rapidjson" version="0"/>
 		<dependency group="com.github.SatyendraBanjare" module="luagit2" artifact="lua5.4-luagit2" version="0.0"/>
 		<dependency group="com.github.sqmedeiros" module="lpeglabel" artifact="lua5.4-lpeglabel" version="1"/>
+		<dependency group="org.muhkuh.lua" module="archive" artifact="lua5.4-archive" version="0.0"/>
+		<dependency group="org.muhkuh.lua" module="mhash" artifact="lua5.4-mhash" version="0.9.9.9"/>
+
+		<!-- DEBUGGING: -->
+		<dependency group="com.github.lunarmodules" module="luasocket" artifact="lua5.4-luasocket" version="3"/>
+		<dependency group="com.github.Tencent" module="LuaPanda" artifact="LuaPanda" version="3"/>
 	</dependencies>
 	<actions>
 		<action name="pack" path="${prj_root}">
