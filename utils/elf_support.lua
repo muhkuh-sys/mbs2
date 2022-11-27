@@ -183,7 +183,7 @@ function tElf_Support:get_load_address(atSegments)
   end
 
   if ulLowestLma == tonumber(tostring(100000000),16) then
-    local strMsg = string.format("Error: Failed to extract load address!")
+    local strMsg = string.format("ERROR: Failed to extract load address!")
     error(strMsg)
   end
 
@@ -353,7 +353,7 @@ function tElf_Support:get_symbol_table(tEnv,strFileName)
       -- Does the symbol already exist? Is the value different?
       if (atSymbols[tmatch_symbols.Name] ~= nil and atSymbols[tmatch_symbols.Name] ~= uiValue) or atSymbols_multiEntry[tmatch_symbols.Name] == true then
         -- The symbol exists more than one time with different values. Now that's a problem.
-        local strMsg = string.format("Error: The symbol:'%s' is still available with a different value in the table.",tmatch_symbols.Name)
+        local strMsg = string.format("ERROR: The symbol:'%s' is still available with a different value in the table.",tmatch_symbols.Name)
         print(strMsg)
 
         -- delete symbol from the table and add it to atSymbols_multiEntry
@@ -363,7 +363,7 @@ function tElf_Support:get_symbol_table(tEnv,strFileName)
       -- Does the symbol already exist? Is the value the same?
       else
         if atSymbols[tmatch_symbols.Name] ~= nil and atSymbols[tmatch_symbols.Name] == tmatch_symbols.Value then
-          local strMsg = string.format("Warning: The symbol:'%s' is still available with the same value in the table.",tmatch_symbols.Name)
+          local strMsg = string.format("WARNING: The symbol:'%s' is still available with the same value in the table.",tmatch_symbols.Name)
           -- print(strMsg)
         end
 
@@ -431,7 +431,7 @@ function tElf_Support:get_macro_definitions(tEnv,strFileName)
       -- Does the macro already exist? Is the value the same?
       else
         if atElfMacros[tmatch_macro.Name] ~= nil and atElfMacros[tmatch_macro.Name] == tmatch_macro.Value then
-          local strMsg = string.format("Warning: The symbol:'%s' is still available with the same value in the table.",tmatch_macro.Name)
+          local strMsg = string.format("WARNING: The symbol:'%s' is still available with the same value in the table.",tmatch_macro.Name)
           -- print(strMsg)
         end
 
@@ -515,7 +515,7 @@ function tElf_Support:get_debug_structure(tEnv,strFileName)
 
       local strKeyTagNode = string.format("<%s><%s>",tostring(tmatch_DW_TAG.Nested_Level_Indicator),tmatch_DW_TAG.Section_Offset)
       if atKeyTagNode[strKeyTagNode] ~= nil then
-        local strMsg = string.format("The tag node:'%s' is still available.",strKeyTagNode)
+        local strMsg = string.format("ERROR: The tag node:'%s' is still available.",strKeyTagNode)
         error(strMsg)
       end
       atKeyTagNode[#atKeyTagNode + 1] = strKeyTagNode
@@ -550,7 +550,7 @@ function tElf_Support:get_debug_structure(tEnv,strFileName)
           -- A further child node - go back to the parent node and add it to the child node table
           local strNodeName = string.format("<%s><%s>",tostring(atNodeTree.tNodeProperties.Nested_Level_Indicator),atNodeTree.tNodeProperties.Section_Offset)
           if atNodeTree.tPrevNode == nil then
-            local strMsg = string.format("No previous node information available of node '%s'!",strNodeName)
+            local strMsg = string.format("ERROR: No previous node information available of node '%s'!",strNodeName)
             error(strMsg)
           end
           atNodeTree = atNodeTree.tPrevNode
@@ -563,7 +563,7 @@ function tElf_Support:get_debug_structure(tEnv,strFileName)
           while (uiNested_Level_Indicator > tmatch_DW_TAG.Nested_Level_Indicator - 1) do
             local strNodeName = string.format("<%s><%s>",tostring(atNodeTree.tNodeProperties.Nested_Level_Indicator),atNodeTree.tNodeProperties.Section_Offset)
             if atNodeTree.tPrevNode == nil then
-              local strMsg = string.format("No previous node information available of node '%s'!",strNodeName)
+              local strMsg = string.format("ERROR: No previous node information available of node '%s'!",strNodeName)
               error(strMsg)
             end
             atNodeTree = atNodeTree.tPrevNode
@@ -692,23 +692,23 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
     local uiNested_Level_Indicator,uiSection_Offset = tostring(tNode.tNodeProperties.uiNested_Level_Indicator),tNode.tNodeProperties.uiSection_Offset
 
     if tNode.tAttributes == nil then
-      local strMsg = string.format("Error: The attribute table is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+      local strMsg = string.format("ERROR: The attribute table is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
       error(strMsg)
     end
 
     if tNode.tAttributes["name"] == nil then
-      local strMsg = string.format("Error: The attribute 'name' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+      local strMsg = string.format("ERROR: The attribute 'name' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
       error(strMsg)
     end
 
     if tNode.tAttributes["const_value"] == nil then
-      local strMsg = string.format("Error: The attribute 'const_value' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+      local strMsg = string.format("ERROR: The attribute 'const_value' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
       error(strMsg)
     end
 
     local tmatch_Attribute = Name_Attribute:match(tNode.tAttributes["name"].Value)
     if tmatch_Attribute == nil then
-      local strMsg = string.format("Error: Failed to get a match of the name of the attribute 'name' of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+      local strMsg = string.format("ERROR: Failed to get a match of the name of the attribute 'name' of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
       error(strMsg)
     end
 
@@ -716,10 +716,10 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
     local uiOffset = tonumber(tNode.tAttributes["const_value"].Value)
 
     if atSymbols[strName] ~= nil and atSymbols[strName] == uiOffset then
-      local strMsg = string.format("Warning: The data '%s' is still available with the same offset value in the symbol table.",strName)
+      local strMsg = string.format("WARNING: The data '%s' is still available with the same offset value in the symbol table.",strName)
       -- print(strMsg)
     elseif atSymbols[strName] ~= nil and atSymbols[strName] ~= uiOffset then
-      local strMsg = string.format("Error: The data '%s' is still available with a different offset value in the symbol table.",strName)
+      local strMsg = string.format("ERROR: The data '%s' is still available with a different offset value in the symbol table.",strName)
       error(strMsg)
     end
 
@@ -732,7 +732,7 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
     local uiNested_Level_Indicator,uiSection_Offset = tostring(tNode.tNodeProperties.uiNested_Level_Indicator),tNode.tNodeProperties.uiSection_Offset
 
     if tNode.tAttributes == nil then
-      local strMsg = string.format("Error: The attribute table is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+      local strMsg = string.format("ERROR: The attribute table is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
       error(strMsg)
     end
 
@@ -740,13 +740,13 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
     if tNode.tAttributes["name"] ~= nil then
       local tmatch_Structure_Name = Name_Attribute:match(tNode.tAttributes.name.Value)
       if tmatch_Structure_Name == nil then
-        local strMsg = string.format("Error: Faild to extract the name of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+        local strMsg = string.format("ERROR: Faild to extract the name of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
         error(strMsg)
       end
       local strStructureName = tmatch_Structure_Name.Name
 
       if tNode.tAttributes["byte_size"] == nil then
-        local strMsg = string.format("Error: The attribute 'byte_size' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
+        local strMsg = string.format("ERROR: The attribute 'byte_size' is not available of node '<%s><%s>'",uiNested_Level_Indicator,uiSection_Offset)
         error(strMsg)
       end
 
@@ -754,10 +754,10 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
       local uiSizeValue = tonumber(tNode.tAttributes["byte_size"].Value,16)
 
       if atSymbols[strSizeName] ~= nil and atSymbols[strSizeName] == uiSizeValue then
-        local strMsg = string.format("Warning: The data '%s' is still available with the same offset value in the symbol table.",strSizeName)
+        local strMsg = string.format("WARNING: The data '%s' is still available with the same offset value in the symbol table.",strSizeName)
         -- print(strMsg)
       elseif atSymbols[strSizeName] ~= nil and atSymbols[strSizeName] ~= uiSizeValue then
-        local strMsg = string.format("Error: The data '%s' is still available with a different offset value in the symbol table.",strSizeName)
+        local strMsg = string.format("ERROR: The data '%s' is still available with a different offset value in the symbol table.",strSizeName)
         error(strMsg)
       end
 
@@ -780,10 +780,10 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
               local uiOffsetValue = tmatch_Member_Offset.Offset_dec -- Use the decimal value entry in the pattern
 
               if atSymbols[strOffsetName] ~= nil and atSymbols[strOffsetName] == uiOffsetValue then
-                local strMsg = string.format("Warning: The data '%s' is still available with the same offset value in the symbol table.",strOffsetName)
+                local strMsg = string.format("WARNING: The data '%s' is still available with the same offset value in the symbol table.",strOffsetName)
                 -- print(strMsg)
               elseif atSymbols[strOffsetName] ~= nil and atSymbols[strOffsetName] ~= uiOffsetValue then
-                local strMsg = string.format("Error: The data '%s' is still available with a different offset value in the symbol table.",strOffsetName)
+                local strMsg = string.format("ERROR: The data '%s' is still available with a different offset value in the symbol table.",strOffsetName)
                 error(strMsg)
               end
 

@@ -21,8 +21,35 @@ else
   local pl = require'pl.import_into'()
   local tLpeg_Support = require "lpeg_support"
 
-  -- strPathElf is neccessary for the dependency of BAM
+
+  --- Calls HBoot image comiler to gernate an image.
+  -- @param strTarget
+  -- @param strHbootDefinition
+  -- @param strPathElf is neccessary for the dependency of BAM
+  -- @param tHbootArguments
+  -- @return strTarget
   function tEnv:HBootImage(strTarget, strHbootDefinition,strPathElf,tHbootArguments)
+
+    -- check input parameters
+    if strTarget == nil or type(strTarget) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strTarget" must be a string.')
+      error(strMsg)
+    end
+
+    if strHbootDefinition == nil or type(strHbootDefinition) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strHbootDefinition" must be a string.')
+      error(strMsg)
+    end
+
+    if strPathElf == nil or type(strPathElf) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strPathElf" must be a string.')
+      error(strMsg)
+    end
+
+    if tHbootArguments == nil or type(tHbootArguments) ~= "table" then
+      local strMsg = string.format('ERROR: The input parameter "tHbootArguments" must be a table.')
+      error(strMsg)
+    end
 
     --FIXME: the arguments must be adapted to the current release version of the hboot image compiler.
     local tFlags = {
@@ -46,7 +73,7 @@ else
 
     for strArg, tValArg in pairs(tHbootArguments) do
       if tFlags[strArg] == nil then
-        local strMsg = string.format('Error: The argument "%s" is not available.', strArg)
+        local strMsg = string.format('ERROR: The argument "%s" is not available.', strArg)
         error(strMsg)
       end
 
@@ -63,12 +90,12 @@ else
       elseif tFlags[strArg].type == type(tValArg) and type(tValArg) == "string" then
         atArguments[#atArguments + 1] = tFlags[strArg].flag .. " " .. tValArg
       else
-        local strMsg = string.format('Error: The argument "%s" has the wrong type.', strArg)
+        local strMsg = string.format('ERROR: The argument "%s" has the wrong type.', strArg)
         error(strMsg)
       end
     end
 
-    -- to prevent rebuiling by BAM
+    -- to prevent rebuiling by BAM, sort the arguments
     local strArguments = ""
     for _,strValue in pl.tablex.sortv(atArguments) do
       strArguments = strArguments .. " " .. strValue
@@ -78,7 +105,7 @@ else
     {
       INTERPRETER_HBOOT = self.atVars["DefaultSettings"].INTERPRETER_HBOOT,
       PATH_HBOOT = self.atVars["DefaultSettings"].PATH_HBOOT,
-      FLAGS = strArguments, --table.concat(atArguments_sort," "),
+      FLAGS = strArguments,
       HBOOT_DEFINITION = strHbootDefinition,
       TARGET = strTarget,
     }

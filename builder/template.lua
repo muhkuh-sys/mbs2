@@ -9,31 +9,40 @@ if tEnv==nil then
   -- Builder
   -- This is the builder code which does the real work.
   --
+
   local pl = require'pl.import_into'()
   local rapidjson = require 'rapidjson'
 
+  -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
+  local mbs2 = require "import_mbs"()
+
+  local tLpeg_Support =  require "lpeg_support"
+
+  -- input argument by BAM calling this module
   local strParameter = _bam_targets[0]
 
   local tParameter, strParameterError = rapidjson.decode(strParameter)
   if tParameter==nil then
-    error(string.format('Failed to decode the input parameter "%s": %s', strParameter, strParameterError))
-  else
-    -- Read the input file.
-    -- NOTE: read the file as binary to keep line feeds.
-    local strInputData, strReadError = pl.utils.readfile(tParameter.input, true)
-    if strInputData==nil then
-      error(string.format('Failed to read the input file "%s": %s', tParameter.input, strReadError))
-    else
-      -- TODO: use gsub with lpeg - rearange the function to this module
-      -- Replace all parameters.
-      local strReplaced = string.gsub(strInputData, '%$%{([^}]+)%}', tParameter.replace)
+    local strMsg = string.format('Failed to decode the input parameter "%s": %s', strParameter, strParameterError)
+    error(strMsg)
+  end
 
-      -- Write the replaced data to the output file.
-      -- NOTE: write the file as binary to keep line feeds.
-      local tWriteResult, strWriteError = pl.utils.writefile(tParameter.output, strReplaced, true)
-      if tWriteResult~=true then
-        error(string.format('Failed to write the output file "%s": %s', tParameter.output, strWriteError))
-      end
+  -- Read the input file.
+  -- NOTE: read the file as binary to keep line feeds.
+  local strInputData, strReadError = pl.utils.readfile(tParameter.input, true)
+  if strInputData==nil then
+    local strMsg = string.format('Failed to read the input file "%s": %s', tParameter.input, strReadError)
+    error(strMsg)
+  else
+    -- Replace all parameters.
+    local strReplaced = tLpeg_Support.Gsub(strInputData,nil,tParameter.replace)
+
+    -- Write the replaced data to the output file.
+    -- NOTE: write the file as binary to keep line feeds.
+    local tWriteResult, strWriteError = pl.utils.writefile(tParameter.output, strReplaced, true)
+    if tWriteResult~=true then
+      local strMsg = string.format('Failed to write the output file "%s": %s', tParameter.output, strWriteError)
+      error(strMsg)
     end
   end
 
@@ -48,6 +57,7 @@ else
   local pl = require'pl.import_into'()
   local luagit2 = require 'luagit2'
   local rapidjson = require 'rapidjson'
+
 
   -------------------------------------------------------------------------------------------------
   --
@@ -137,6 +147,23 @@ else
 
   --- Given replacements are used for the template
   function tEnv:Template(strTarget, strInput, atReplacement)
+
+    -- check input parameters
+    if strTarget == nil or type(strTarget) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strTarget" must be a string.')
+      error(strMsg)
+    end
+
+    if strInput == nil or type(strInput) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strInput" must be a string.')
+      error(strMsg)
+    end
+
+    if atReplacement == nil or type(atReplacement) == "table" then
+      local strMsg = string.format('ERROR: The input parameter "atReplacement" must be a table.')
+      error(strMsg)
+    end
+
     local tFilterParameter = {
       input = pl.path.abspath(strInput),
       output = pl.path.abspath(strTarget),
@@ -144,20 +171,39 @@ else
     }
 
     local strFilterParameter = rapidjson.encode(tFilterParameter, { sort_keys=true })
+
     AddJob(
       tFilterParameter.output, -- outputs
       string.format('Template %s', tFilterParameter.input), -- label
       _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strFilterParameter}) -- cmd
     )
+
     return tFilterParameter.output
   end
 
 
   --- The version and VCS are used as replacements (plus extra replacements) for the template
   function tEnv:VersionTemplate(strTarget, strInput, atExtraReplacements)
+
+    -- check input parameters
+    if strTarget == nil or type(strTarget) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strTarget" must be a string.')
+      error(strMsg)
+    end
+
+    if strInput == nil or type(strInput) ~= "string" then
+      local strMsg = string.format('ERROR: The input parameter "strInput" must be a string.')
+      error(strMsg)
+    end
+
+    if not (atExtraReplacements == nil or type(atExtraReplacements) == "table") then
+      local strMsg = string.format('ERROR: The input parameter "atExtraReplacements" must be nil or a table.')
+      error(strMsg)
+    end
+
     local strGitDescription = getGitDescription('.')
     local strProjectVersionVcs, strProjectVersionVcsLong = parseGitID(strGitDescription)
-    print(strProjectVersionVcs, strProjectVersionVcsLong)
+    -- print(strProjectVersionVcs, strProjectVersionVcsLong)
 
     local atReplacement = {
       PROJECT_VERSION_MAJOR = self.atVars.PROJECT_VERSION[1],
@@ -183,11 +229,13 @@ else
     }
 
     local strFilterParameter = rapidjson.encode(tFilterParameter, { sort_keys=true })
+
     AddJob(
       tFilterParameter.output, -- output
       string.format('VersionTemplate %s', tFilterParameter.input), -- label
       _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strFilterParameter}) -- cmd
     )
+
     return tFilterParameter.output
   end
 end
