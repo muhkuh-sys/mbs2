@@ -23,7 +23,7 @@ if tEnv==nil then
 
   local tParameter, strParameterError = rapidjson.decode(strParameter)
   if tParameter==nil then
-    local strMsg = string.format('Failed to decode the input parameter "%s": %s', strParameter, strParameterError)
+    local strMsg = string.format('ERROR: Failed to decode the input parameter "%s": %s', strParameter, strParameterError)
     error(strMsg)
   end
 
@@ -31,9 +31,10 @@ if tEnv==nil then
   -- NOTE: read the file as binary to keep line feeds.
   local strInputData, strReadError = pl.utils.readfile(tParameter.input, true)
   if strInputData==nil then
-    local strMsg = string.format('Failed to read the input file "%s": %s', tParameter.input, strReadError)
+    local strMsg = string.format('ERROR: Failed to read the input file "%s": %s', tParameter.input, strReadError)
     error(strMsg)
   else
+
     -- Replace all parameters.
     local strReplaced = tLpeg_Support.Gsub(strInputData,nil,tParameter.replace)
 
@@ -41,7 +42,7 @@ if tEnv==nil then
     -- NOTE: write the file as binary to keep line feeds.
     local tWriteResult, strWriteError = pl.utils.writefile(tParameter.output, strReplaced, true)
     if tWriteResult~=true then
-      local strMsg = string.format('Failed to write the output file "%s": %s', tParameter.output, strWriteError)
+      local strMsg = string.format('ERROR: Failed to write the output file "%s": %s', tParameter.output, strWriteError)
       error(strMsg)
     end
   end
@@ -82,7 +83,7 @@ else
     }
     local tBufOutput = luagit2.describe_format(tDescribeResult, tDescribeResultOptions)
     local strGitId = luagit2.buf_details(tBufOutput)
-    print(string.format('GIT description: "%s"', strGitId))
+    -- print(string.format('GIT description: "%s"', strGitId))
 
     luagit2.repository_free(tRepo)
     luagit2.shutdown()
@@ -103,10 +104,10 @@ else
     local strProjectVersionVcs = 'unknown'
     local strProjectVersionVcsLong = 'unknown'
 
-    print(string.format('Parsing GIT description "%s".', strGitId))
+    -- print(string.format('Parsing GIT description "%s".', strGitId))
     local tMatch = string.match(strGitId, '^%x%x%x%x%x%x%x%x%x%x%x%x%+?$')
     if tMatch~=nil then
-      print(string.format('This is a repository with no tags. Use the hash.'))
+      -- print(string.format('This is a repository with no tags. Use the hash.'))
       strProjectVersionVcs = strGitId
       strProjectVersionVcsLong = strGitId
     else
@@ -114,16 +115,16 @@ else
       if strVersion~=nil then
         local ulRevsSinceTag = tonumber(strRevsSinceTag)
         if ulRevsSinceTag==0 and strDirty=='' then
-          print(string.format('This is a repository which is exactly on a tag without modification. Use the tag name.'))
+          -- print(string.format('This is a repository which is exactly on a tag without modification. Use the tag name.'))
           strProjectVersionVcs = string.format('v%s%s', strVersion, strDirty)
           strProjectVersionVcsLong = string.format('v%s-%s%s', strVersion, strHash, strDirty)
         else
-          print(string.format('This is a repository with commits after the last tag. Use the hash.'))
+          -- print(string.format('This is a repository with commits after the last tag. Use the hash.'))
           strProjectVersionVcs = string.format('%s%s', strHash, strDirty)
           strProjectVersionVcsLong = string.format('%s%s', strHash, strDirty)
         end
       else
-        print(string.format('The description has an unknown format.'))
+        -- print(string.format('The description has an unknown format.'))
         strProjectVersionVcs = strGitId
         strProjectVersionVcsLong = strGitId
       end
@@ -132,8 +133,8 @@ else
     -- Prepend "GIT" to the VCS ID.
     strProjectVersionVcs = 'GIT' .. strProjectVersionVcs
     strProjectVersionVcsLong = 'GIT' .. strProjectVersionVcsLong
-   print(string.format('PROJECT_VERSION_VCS = "%s"', strProjectVersionVcs))
-   print(string.format('PROJECT_VERSION_VCS_LONG = "%s"', strProjectVersionVcsLong))
+  --  print(string.format('PROJECT_VERSION_VCS = "%s"', strProjectVersionVcs))
+  --  print(string.format('PROJECT_VERSION_VCS_LONG = "%s"', strProjectVersionVcsLong))
 
     return strProjectVersionVcs, strProjectVersionVcsLong
   end
