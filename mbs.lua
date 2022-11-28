@@ -30,6 +30,8 @@ end
 --
 -- Global helper functions.
 --
+
+---
 function SubBAM(strPath)
   -- Read the specified file.
   local compat = require 'pl.compat'
@@ -512,6 +514,9 @@ tEnvDefault:AddBuilder('mbs2/builder/hboot_image.lua')
 
 -- Add archive builder
 tEnvDefault:AddBuilder('mbs2/builder/mbs_archive.lua')
+
+-- Add hash builder
+tEnvDefault:AddBuilder('mbs2/builder/hash.lua')
 
 
 -- Finally lock the table again.
