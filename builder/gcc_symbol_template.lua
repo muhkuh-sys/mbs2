@@ -16,8 +16,8 @@ if tEnv==nil then
   -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
   local mbs2 = require "import_mbs"()
 
-  local tElf_Support =  require "elf_support"
-  local tLpeg_Support =  require "lpeg_support"
+  local tElf_Support =  require "elf_support"()
+  local tLpeg_Support =  require "lpeg_support"()
 
 
   -- copy data from table 2 to table 1 - check double entries
@@ -83,7 +83,7 @@ if tEnv==nil then
   end
 
   -- Replace all symbols in the template.
-  local strResult = tLpeg_Support.Gsub(strTemplate,nil,atSymbols)
+  local strResult = tLpeg_Support:Gsub(strTemplate,nil,atSymbols)
 
   -- Write the result.
   local tWriteResult, strWriteError = pl.utils.writefile(strTarget, strResult, true)

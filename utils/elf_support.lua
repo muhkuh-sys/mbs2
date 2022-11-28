@@ -1,22 +1,31 @@
--- create an object of the module
-local tElf_Support = {}
+-- Create the Elf_Support class.
+local class = require 'pl.class'
+local Elf_Support = class()
+
+---------------------------------------------------------------------------------------------------------------------
+--
+-- global declaration of variables
+--
 
 local pl = require'pl.import_into'()
+local lpeg = require "lpeglabel"
 
 -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
 local mbs2 = require "import_mbs"()
 
-local tLpeg_Support = require "lpeg_support"
-local lpeg = require "lpeglabel"
+local tLpeg_Support = require "lpeg_support"()
 
 -- Save typing:
 local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs, match,
-OptionalSpace,Space,Comma,
-Spaces,OptSpace,UpTo,Anywhere,List,SetEitherOrPattern,Gsub =
+OptionalSpace,Space,Comma =
 lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs, lpeg.match,
-tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma,
-tLpeg_Support.Spaces,tLpeg_Support.OptSpace,tLpeg_Support.UpTo,tLpeg_Support.Anywhere,
-tLpeg_Support.List,tLpeg_Support.SetEitherOrPattern,tLpeg_Support.Gsub
+tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma
+
+function Elf_Support:_init()
+
+
+end
+
 
 ---------------------------------------------------------------------------------------------------------------------
 --
@@ -52,7 +61,7 @@ local function executeCmd(tCmd)
   tCmd.FLAGS = (type(tCmd.FLAGS) == "table") and table.concat(tCmd.FLAGS,' ') or tCmd.FLAGS
 
   local strCMD_TEMPLATE = "${CMD} ${FLAGS} ${SOURCE}"
-  local strCmd = tLpeg_Support.Gsub(strCMD_TEMPLATE,nil,tCmd)
+  local strCmd = tLpeg_Support:Gsub(strCMD_TEMPLATE,nil,tCmd)
 
   local fResult,strReturnCode,strStdout,strError = pl.utils.executeex(strCmd)
   if fResult ~= true then
@@ -98,7 +107,7 @@ end
 
 
 --- extract "Entry point address" from elf file header.
-function tElf_Support:get_segment_table(tEnv,strFileName,astrSegmentsToConsider)
+function Elf_Support:get_segment_table(tEnv,strFileName,astrSegmentsToConsider)
 
   local astrSegmentsToConsiderSet = (astrSegmentsToConsider ~= nil) and pl.Set(astrSegmentsToConsider) or nil
 
@@ -108,20 +117,20 @@ function tElf_Support:get_segment_table(tEnv,strFileName,astrSegmentsToConsider)
     P{
       "start", --> this tells LPEG which rule to process first
       start     = V"Idx" * V"Name" * V"Size" * V"VMA" * V"LMA" * V"File_off" * V"Allgn" * V"Flags" + 1* V"start",
-      Idx       = UpTo(R("09")^1,Space,"Idx",tonumber) + 1*V"Idx",
-      Name      = UpTo(P(1),Space + -1,"Name") + 1*V"Name",
-      Size      = UpTo(R("09","af", "AZ")^1,Space,"Size",tonumber_base16) + 1*V"Size",
-      VMA       = UpTo(R("09","af", "AZ")^1,Space,"VMA",tonumber_base16) + 1*V"VMA",
-      LMA       = UpTo(R("09","af", "AZ")^1,Space,"LMA",tonumber_base16) + 1*V"LMA",
-      File_off  = UpTo(R("09","af", "AZ")^1,Space,"File_off",tonumber_base16) + 1*V"File_off",
+      Idx       = tLpeg_Support:UpTo(R("09")^1,Space,"Idx",tonumber) + 1*V"Idx",
+      Name      = tLpeg_Support:UpTo(P(1),Space + -1,"Name") + 1*V"Name",
+      Size      = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Size",tonumber_base16) + 1*V"Size",
+      VMA       = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"VMA",tonumber_base16) + 1*V"VMA",
+      LMA       = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"LMA",tonumber_base16) + 1*V"LMA",
+      File_off  = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"File_off",tonumber_base16) + 1*V"File_off",
       Allgn     = Cg(
                     Ct(
-                      UpTo(R("09")^1,P"**","Base") *
-                      UpTo(R("09")^1,Space,"Exponent")
+                      tLpeg_Support:UpTo(R("09")^1,P"**","Base") *
+                      tLpeg_Support:UpTo(R("09")^1,Space,"Exponent")
                       ) / fPow
                     ,"Allgn")
                   + 1*V"Allgn",
-      Flags     = Cg(Ct(List((P(1) - Comma)^1,OptSpace(P","))) / fToSet,"Flags"),
+      Flags     = Cg(Ct(tLpeg_Support:List((P(1) - Comma)^1,tLpeg_Support:OptSpace(P","))) / fToSet,"Flags"),
     }
   }
 
@@ -149,19 +158,19 @@ end
 
 
 ---
-function tElf_Support:segment_get_name(tSegment)
+function Elf_Support:segment_get_name(tSegment)
   return tSegment['name']
 end
 
 
 ---
-function tElf_Support:segment_get_size(tSegment)
+function Elf_Support:segment_get_size(tSegment)
   return tSegment['size']
 end
 
 
 ---
-function tElf_Support:segment_is_loadable(tSegment)
+function Elf_Support:segment_is_loadable(tSegment)
   return tSegment.Flags["CONTENTS"] == true and
           tSegment.Flags["ALLOC"] == true and
           tSegment.Flags["LOAD"] == true
@@ -170,7 +179,7 @@ end
 
 
 --- extract load address
-function tElf_Support:get_load_address(atSegments)
+function Elf_Support:get_load_address(atSegments)
   -- Set an invalid lma
   local ulLowestLma = tonumber(tostring(100000000),16)
 
@@ -192,7 +201,7 @@ end
 
 
 --- get estimated bin size
-function tElf_Support:get_estimated_bin_size(atSegments)
+function Elf_Support:get_estimated_bin_size(atSegments)
   local ulLoadAddress = self:get_load_address(atSegments)
   local ulBiggestOffset = 0
 
@@ -217,7 +226,7 @@ end
 -- The global symbol is better, as it holds not only the plain address, but
 -- also thumb information.
 -- The address from the file header does not have any thumb information.
-function tElf_Support:get_exec_address(tEnv,strFileName)
+function Elf_Support:get_exec_address(tEnv,strFileName)
 
   -- be pessimistic
   local iResult = false
@@ -232,13 +241,13 @@ function tElf_Support:get_exec_address(tEnv,strFileName)
     P{
       "start", --> this tells LPEG which rule to process first
       start = V"Num" * V"Value" * V"Size" * V"Type" * V"Bind" * V"Vis" * V"Ndx" * V"Name" + 1* V"start",
-      Num   = UpTo(R("09")^1,P':' * Space,"Num",tonumber),
-      Value = UpTo(R("09","af", "AF")^1,Space,"Value",tonumber_base16),
-      Size  = UpTo(R("09")^1,Space,"Size",tonumber),
-      Type  = UpTo(R("09","af", "AZ")^1,Space,"Type"),
+      Num   = tLpeg_Support:UpTo(R("09")^1,P':' * Space,"Num",tonumber),
+      Value = tLpeg_Support:UpTo(R("09","af", "AF")^1,Space,"Value",tonumber_base16),
+      Size  = tLpeg_Support:UpTo(R("09")^1,Space,"Size",tonumber),
+      Type  = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Type"),
       Bind  = Cg(P'GLOBAL',"Bind") * Space, -- Only GLOBAL!
       Vis   = Cg(P"DEFAULT","Vis") * Space,
-      Ndx   = UpTo(R("09","af", "AZ")^1,Space,"Ndx"),
+      Ndx   = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Ndx"),
       Name  = Cg(P"start","Name") * (Space + -1),
     }
   }
@@ -248,8 +257,8 @@ function tElf_Support:get_exec_address(tEnv,strFileName)
   Ct{
     P{
       "start", --> this tells LPEG which rule to process first
-      start =V"Name" * V"Value" + 1* V"start",
-      Value = P"0x" * UpTo(R("09","af", "AF")^1,Space + -1,"Value",tonumber_base16) + 1*V"Value",
+      start = V"Name" * V"Value" + 1* V"start",
+      Value = P"0x" * tLpeg_Support:UpTo(R("09","af", "AF")^1,Space + -1,"Value",tonumber_base16) + 1*V"Value",
       Name  = P"Entry point address:" + 1*V"Name",
     }
   }
@@ -257,8 +266,8 @@ function tElf_Support:get_exec_address(tEnv,strFileName)
   -- process readelf command and return the result as string
   local strStdout = executeCmd(
     {
-      CMD = tEnv.READELF,
-      FLAGS = {'--file-header'},
+      CMD    = tEnv.READELF,
+      FLAGS  = {'--file-header'},
       SOURCE = strFileName
     }
   )
@@ -280,8 +289,8 @@ function tElf_Support:get_exec_address(tEnv,strFileName)
     -- process readelf command and return the result as string
     local strStdout = executeCmd(
       {
-        CMD = tEnv.READELF,
-        FLAGS = {'--syms'},
+        CMD    = tEnv.READELF,
+        FLAGS  = {'--syms'},
         SOURCE = strFileName
       }
     )
@@ -311,7 +320,7 @@ end
 
 
 --- extract symbols from ELF file.
-function tElf_Support:get_symbol_table(tEnv,strFileName)
+function Elf_Support:get_symbol_table(tEnv,strFileName)
 
   -- symbol table
   local atSymbols = {}
@@ -322,22 +331,22 @@ function tElf_Support:get_symbol_table(tEnv,strFileName)
     P{
       "start", --> this tells LPEG which rule to process first
       start = V"Num" * V"Value" * V"Size" * V"Type" * V"Bind" * V"Vis" * V"Ndx" * V"Name" + 1* V"start",
-      Num   = UpTo(R("09")^1,P':' * Space,"Num",tonumber),
-      Value = UpTo(R("09","af", "AF")^1,Space,"Value",tonumber_base16),
-      Size  = UpTo(R("09")^1,Space,"Size",tonumber),
-      Type  = UpTo(R("09","af", "AZ")^1,Space,"Type"),
+      Num   = tLpeg_Support:UpTo(R("09")^1,P':' * Space,"Num",tonumber),
+      Value = tLpeg_Support:UpTo(R("09","af", "AF")^1,Space,"Value",tonumber_base16),
+      Size  = tLpeg_Support:UpTo(R("09")^1,Space,"Size",tonumber),
+      Type  = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Type"),
       Bind  = Cg(P'GLOBAL',"Bind") * Space, -- Only GLOBAL!
-      Vis   = UpTo(R("09","af", "AZ")^1,Space,"Vis"),
-      Ndx   = UpTo(R("09","af", "AZ")^1,Space,"Ndx"),
-      Name  = UpTo(P(1),Space + -1,"Name"),
+      Vis   = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Vis"),
+      Ndx   = tLpeg_Support:UpTo(R("09","af", "AZ")^1,Space,"Ndx"),
+      Name  = tLpeg_Support:UpTo(P(1),Space + -1,"Name"),
     }
   }
 
   -- process readelf command and return the result as string
   local strStdout = executeCmd(
     {
-      CMD = tEnv.READELF,
-      FLAGS = {'--symbols', '--wide'},
+      CMD    = tEnv.READELF,
+      FLAGS  = {'--symbols', '--wide'},
       SOURCE = strFileName
     }
   )
@@ -377,7 +386,7 @@ end
 
 
 --- extract macro symbols from elf file.
-function tElf_Support:get_macro_definitions(tEnv,strFileName)
+function Elf_Support:get_macro_definitions(tEnv,strFileName)
   -- Macro symbol table
   local atElfMacros = {}
 
@@ -396,19 +405,19 @@ function tElf_Support:get_macro_definitions(tEnv,strFileName)
   Ct{
     P{
       "start", --> this tells LPEG which rule to process first
-      start = V"Macro_definition" * V"String_const" * V"Macro" * V"Value" + 1*V"start",
-      Macro_definition = SetEitherOrPattern(tMacro_definition) + 1 * V"Macro_definition",
-      String_const = OptSpace(P"-") *  P'lineno' * OptSpace(P":") * OptSpace(R("09","af", "AF")^1) * P'macro' * OptSpace(P":"),
-      Macro = UpTo(P(1),Space,"Name") ,
-      Value = UpTo(P(1)^1,-1,"Value"), -- Could be a value or a strings
+      start            = V"Macro_definition" * V"String_const" * V"Macro" * V"Value" + 1*V"start",
+      Macro_definition = tLpeg_Support:SetEitherOrPattern(tMacro_definition) + 1 * V"Macro_definition",
+      String_const     = tLpeg_Support:OptSpace(P"-") *  P'lineno' * tLpeg_Support:OptSpace(P":") * tLpeg_Support:OptSpace(R("09","af", "AF")^1) * P'macro' * tLpeg_Support:OptSpace(P":"),
+      Macro            = tLpeg_Support:UpTo(P(1),Space,"Name") ,
+      Value            = tLpeg_Support:UpTo(P(1)^1,-1,"Value"), -- Could be a value or a strings
     }
   }
 
   -- process readelf command and return the result as string
   local strStdout = executeCmd(
     {
-      CMD = tEnv.READELF,
-      FLAGS = {'--debug-dump=macro'},
+      CMD    = tEnv.READELF,
+      FLAGS  = {'--debug-dump=macro'},
       SOURCE = strFileName
     }
   )
@@ -463,7 +472,7 @@ end
   -- .debug_abbrev	Abbreviations used in the .debug_info section
   -- https://developer.ibm.com/articles/au-dwarf-debug-format/#:~:text=DWARF%20(debugging%20with%20attributed%20record,can%20have%20children%20or%20siblings.
   --
-function tElf_Support:get_debug_structure(tEnv,strFileName)
+function Elf_Support:get_debug_structure(tEnv,strFileName)
 
   -- pattern of Debugging Information Entry (DIE)
   local DW_TAG =
@@ -471,11 +480,11 @@ function tElf_Support:get_debug_structure(tEnv,strFileName)
     P{
       "start", --> this tells LPEG which rule to process first
       start                  = V"Nested_Level_Indicator" * V"Section_Offset" * V"Abbrev_String" * V"Abbrev_Number" * V"TAG_Name" + 1 * V"start",
-      Nested_Level_Indicator = P'<' * UpTo(R("09"),P'>',"Nested_Level_Indicator",tonumber) + 1 * V"Nested_Level_Indicator",
-      Section_Offset         = P'<' * UpTo(R("09","af", "AF"),P'>:',"Section_Offset") + 1 * V"Section_Offset",
+      Nested_Level_Indicator = P'<' * tLpeg_Support:UpTo(R("09"),P'>',"Nested_Level_Indicator",tonumber) + 1 * V"Nested_Level_Indicator",
+      Section_Offset         = P'<' * tLpeg_Support:UpTo(R("09","af", "AF"),P'>:',"Section_Offset") + 1 * V"Section_Offset",
       Abbrev_String          = P'Abbrev Number:' + 1 * V"Abbrev_String",
       Abbrev_Number          = Cg(R("09")^1 / tonumber,"Abbrev_Number") + 1 * V"Abbrev_Number",
-      TAG_Name               = P'(DW_TAG_' * UpTo(P(1),P')',"TAG_Name") + 1 * V"TAG_Name"
+      TAG_Name               = P'(DW_TAG_' * tLpeg_Support:UpTo(P(1),P')',"TAG_Name") + 1 * V"TAG_Name"
     }
   }
 
@@ -485,17 +494,17 @@ function tElf_Support:get_debug_structure(tEnv,strFileName)
     P{
       "start", --> this tells LPEG which rule to process first
       start          = V"Section_Offset" * V"Attribute_Name" * V"Value" + 1 * V"start",
-      Section_Offset = P'<' * UpTo(R("09","af", "AF"),P'>',"Section_Offset"),
-      Attribute_Name = P'DW_AT_' * UpTo(P(1),P':' + Space,"Attribute_Name") * P':'^0 + 1 * V"Attribute_Name",
-      Value          = OptionalSpace * UpTo(P(1),P(-1),"Value")
+      Section_Offset = P'<' * tLpeg_Support:UpTo(R("09","af", "AF"),P'>',"Section_Offset"),
+      Attribute_Name = P'DW_AT_' * tLpeg_Support:UpTo(P(1),P':' + Space,"Attribute_Name") * P':'^0 + 1 * V"Attribute_Name",
+      Value          = OptionalSpace * tLpeg_Support:UpTo(P(1),P(-1),"Value")
     }
   }
 
   -- process readelf command and return the result as string
   local strStdout = executeCmd(
     {
-      CMD = tEnv.READELF,
-      FLAGS = {'--debug-dump=info'},
+      CMD    = tEnv.READELF,
+      FLAGS  = {'--debug-dump=info'},
       SOURCE = strFileName
     }
   )
@@ -612,7 +621,7 @@ end
 
 
 --- Extract symbols of the tree node debug_info table.
-function tElf_Support:__iter_debug_info(atSymbols,atRootTree_DebugInfo,tSearchPattern,fExtractData)
+function Elf_Support:__iter_debug_info(atSymbols,atRootTree_DebugInfo,tSearchPattern,fExtractData)
 
   -- recursive function to get further into the tree structure of atRootTree_DebugInfo by using the search pattern table.
   local function iterRootTree(tTree,uiSearchPatternLevel)
@@ -642,7 +651,7 @@ end
 
 
 --- Extract symbols of enumerator and structure nodes of the tree node debug_info.
-function tElf_Support:get_debug_symbols(tEnv,strFileName)
+function Elf_Support:get_debug_symbols(tEnv,strFileName)
 
   local atElfDebugSymbols = {}
 
@@ -667,8 +676,8 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
       "start", --> this tells LPEG which rule to process first
       start  = V"String" * V"Offset" * V"Name" + 1*V"start",
       String = P'(indirect string, offset:',
-      Offset = P"0x" * UpTo(R("09","af", "AF"),P'):',"Offset") + 1*V"Offset",
-      Name  = OptionalSpace * UpTo(P(1),P(-1),"Name")
+      Offset = P"0x" * tLpeg_Support:UpTo(R("09","af", "AF"),P'):',"Offset") + 1*V"Offset",
+      Name   = OptionalSpace * tLpeg_Support:UpTo(P(1),P(-1),"Name")
     }
   }
 
@@ -678,11 +687,11 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
   Ct{
     P{
       "start", --> this tells LPEG which rule to process first
-      start  = V"String_Const" * V"Numb_Const" * V"Offset_hex" * V"Offset_dec"  + 1 * V"start",
+      start        = V"String_Const" * V"Numb_Const" * V"Offset_hex" * V"Offset_dec"  + 1 * V"start",
       String_Const = P"byte block:" + 1 * V"String_Const" ,
-      Numb_Const = R("09","af", "AF")^1 + 1 * V"Numb_Const",
-      Offset_hex = UpTo(R("09","af", "AF"),Space,"Offset_hex",tonumber_base16) + 1* V"Offset_hex",
-      Offset_dec = P'(DW_OP_plus_uconst:' * OptionalSpace * UpTo(R("09","af", "AF"),P')',"Offset_dec",tonumber) + 1 * V"Offset_dec"
+      Numb_Const   = R("09","af", "AF")^1 + 1 * V"Numb_Const",
+      Offset_hex   = tLpeg_Support:UpTo(R("09","af", "AF"),Space,"Offset_hex",tonumber_base16) + 1* V"Offset_hex",
+      Offset_dec   = P'(DW_OP_plus_uconst:' * OptionalSpace * tLpeg_Support:UpTo(R("09","af", "AF"),P')',"Offset_dec",tonumber) + 1 * V"Offset_dec"
     }
   }
 
@@ -826,4 +835,4 @@ function tElf_Support:get_debug_symbols(tEnv,strFileName)
 end
 
 
-return tElf_Support
+return Elf_Support

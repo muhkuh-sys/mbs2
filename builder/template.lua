@@ -16,7 +16,7 @@ if tEnv==nil then
   -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
   local mbs2 = require "import_mbs"()
 
-  local tLpeg_Support =  require "lpeg_support"
+  local tLpeg_Support =  require "lpeg_support"()
 
   -- input argument by BAM calling this module
   local strParameter = _bam_targets[0]
@@ -36,7 +36,7 @@ if tEnv==nil then
   else
 
     -- Replace all parameters.
-    local strReplaced = tLpeg_Support.Gsub(strInputData,nil,tParameter.replace)
+    local strReplaced = tLpeg_Support:Gsub(strInputData,nil,tParameter.replace)
 
     -- Write the replaced data to the output file.
     -- NOTE: write the file as binary to keep line feeds.

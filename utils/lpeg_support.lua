@@ -3,58 +3,62 @@
 local lpeg = require "lpeglabel"
 
 -- Init lpeg_support
-local tLpeg_Support =  require "lpeg_support"
+local tLpeg_Support =  require "lpeg_support"()
 
 -- Save typing:
 local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs, match,
-OptionalSpace,Space,Comma,
-Spaces,OptSpace,UpTo,Anywhere,List,SetEitherOrPattern,Gsub =
+OptionalSpace,Space,Comma =
 lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs, lpeg.match,
-tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma,
-tLpeg_Support.Spaces,tLpeg_Support.OptSpace,tLpeg_Support.UpTo,tLpeg_Support.Anywhere,
-tLpeg_Support.List,tLpeg_Support.SetEitherOrPattern,tLpeg_Support.Gsub
+tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma
 --]==]
 
--- create an object of the module
-local tLpeg_Support = {}
 
-local pl = require'pl.import_into'()
+-- Create the Lpeg_Support class.
+local class = require 'pl.class'
+local Lpeg_Support = class()
 
 ---------------------------------------------------------------------------------------------------------------------
 --
--- Pattern and auxiliary functions of lpeg
+-- global declaration of variables
 --
 
---- Init lpeg
+local pl = require'pl.import_into'()
 local lpeg = require "lpeglabel"
 
 -- Save typing function names with "lpeg" in front of them:
 local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs
 
-
--- Match optional whitespace.
+-- auxiliary pattern
 local OptionalSpace = S(" \t") ^ 0
 local Space = S(" \t") ^ 1
 local Comma = P(",")
-tLpeg_Support.OptionalSpace = OptionalSpace
-tLpeg_Support.Space = Space
-tLpeg_Support.Comma = Comma
 
+function Lpeg_Support:_init()
+
+  self.OptionalSpace = OptionalSpace
+  self.Space = Space
+  self.Comma = Comma
+end
+
+---------------------------------------------------------------------------------------------------------------------
+--
+-- auxiliary functions of lpeg
+--
 
 -- Auxiliary function: add spaces around pattern
-tLpeg_Support.Spaces = function(Pattern)
+function Lpeg_Support:Spaces(Pattern)
   return Space * Pattern * Space
 end
 
 
 -- Auxiliary function: add optinal spaces around pattern
-tLpeg_Support.OptSpace = function(Pattern)
+function Lpeg_Support:OptSpace(Pattern)
   return OptionalSpace * Pattern * OptionalSpace
 end
 
 
 -- Auxiliary function: match everything up to the pattern (return a caption)
-tLpeg_Support.UpTo = function(SEARCH_PATTERN,END_PATTERN,strSearchPattern,fCapture)
+function Lpeg_Support:UpTo(SEARCH_PATTERN,END_PATTERN,strSearchPattern,fCapture)
   fCapture = fCapture or nil
   if fCapture ~= nil and type(fCapture) == "function" then
     return Cg((SEARCH_PATTERN - (END_PATTERN)) ^ 1 / fCapture,strSearchPattern) * END_PATTERN
@@ -65,19 +69,19 @@ end
 
 
 -- Auxiliary function: return a grammar which tries to match the given pattern in a string
-tLpeg_Support.Anywhere = function(Pattern)
-  return P {Pattern + 1 * lpeg.V(1)}
+function Lpeg_Support:Anywhere(Pattern)
+  return P {Pattern + 1 * V(1)}
 end
 
 
 -- Auxiliary function: list-pattern with separator
-tLpeg_Support.List = function(Pattern, Sep)
+function Lpeg_Support:List(Pattern, Sep)
   return C(Pattern) * (Sep * C(Pattern)) ^ 0
 end
 
 
 -- Auxiliary function: Create an either or pattern of the table entries
-tLpeg_Support.SetEitherOrPattern = function(tSearchingPattern)
+function Lpeg_Support:SetEitherOrPattern(tSearchingPattern)
   local Pattern = nil
   for _,strValue in ipairs(tSearchingPattern) do
     if Pattern == nil then
@@ -91,7 +95,7 @@ end
 
 
 -- Auxiliary function: Replace templates in a string with given replacement(s)
-function tLpeg_Support.Gsub(strTemplate,TEMPLATE_PATTERN,tReplacements)
+function Lpeg_Support:Gsub(strTemplate,TEMPLATE_PATTERN,tReplacements)
   TEMPLATE_PATTERN = TEMPLATE_PATTERN or P"${" * C((P(1) - P"}")^1) * P"}"
 
   local fReplace = function(tmatch)
@@ -137,4 +141,4 @@ function tLpeg_Support.Gsub(strTemplate,TEMPLATE_PATTERN,tReplacements)
   return Substitution:match(strTemplate)
 end
 
-return tLpeg_Support
+return Lpeg_Support

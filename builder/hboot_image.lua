@@ -19,7 +19,7 @@ else
 
   --- global declaration of variables:
   local pl = require'pl.import_into'()
-  local tLpeg_Support = require "lpeg_support"
+  local tLpeg_Support = require "lpeg_support"()
 
 
   --- Calls HBoot image comiler to gernate an image.
@@ -111,7 +111,7 @@ else
     }
 
     local strCMD_TEMPLATE = "${INTERPRETER_HBOOT} ${PATH_HBOOT} ${FLAGS} ${HBOOT_DEFINITION} ${TARGET}"
-    local strCMD = tLpeg_Support.Gsub(strCMD_TEMPLATE,nil,tCMD)
+    local strCMD = tLpeg_Support:Gsub(strCMD_TEMPLATE,nil,tCMD)
 
     AddJob(
       strTarget,

@@ -23,7 +23,7 @@ if tEnv==nil then
     -- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
     local mbs2 = require "import_mbs"()
 
-    self.tLpeg_Support =  require "lpeg_support"
+    self.tLpeg_Support =  require "lpeg_support"()
 
     -- input argument by BAM calling this module
     local strParameter = _bam_targets[0]
@@ -164,7 +164,7 @@ if tEnv==nil then
     -- Replace all replacments in the template and add all hash values
     local strHashFile = ""
     for _,tHashReplacements in ipairs(atHashReplacements) do
-      strHashFile = strHashFile .. tLpeg_Support.Gsub(self.strHash_template,nil,tHashReplacements)
+      strHashFile = strHashFile .. tLpeg_Support:Gsub(self.strHash_template,nil,tHashReplacements)
     end
 
     -- Write the result.

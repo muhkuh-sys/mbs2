@@ -171,16 +171,13 @@ else
   local lpeg = require "lpeglabel"
 
   -- Init lpeg_support
-  local tLpeg_Support =  require "lpeg_support"
+  local tLpeg_Support =  require "lpeg_support"()
 
   -- Save typing:
   local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs, match,
-  OptionalSpace,Space,Comma,
-  Spaces,OptSpace,UpTo,Anywhere,List,SetEitherOrPattern,Gsub =
+  OptionalSpace,Space,Comma =
   lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs, lpeg.match,
-  tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma,
-  tLpeg_Support.Spaces,tLpeg_Support.OptSpace,tLpeg_Support.UpTo,tLpeg_Support.Anywhere,
-  tLpeg_Support.List,tLpeg_Support.SetEitherOrPattern,tLpeg_Support.Gsub
+  tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma
 
 
   -----------------------------------------------------------------------------
@@ -285,8 +282,8 @@ else
     end
 
     -- pattern of format and filter in the archive object
-    local Filter = Ct(Anywhere(P"ARCHIVE_FILTER_" * UpTo(P(1),-1,"filter")))
-    local Format = Ct(Anywhere(P"ARCHIVE_FORMAT_" * UpTo(P(1),-1,"format")))
+    local Filter = Ct(tLpeg_Support:Anywhere(P"ARCHIVE_FILTER_" * tLpeg_Support:UpTo(P(1),-1,"filter")))
+    local Format = Ct(tLpeg_Support:Anywhere(P"ARCHIVE_FORMAT_" * tLpeg_Support:UpTo(P(1),-1,"format")))
     local atFilter_Archive = {}
     local atFormat_Archive = {}
 
