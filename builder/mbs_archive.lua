@@ -336,7 +336,6 @@ else
       end
     end
 
-
     if tArchiveStructure == nil or type(tArchiveStructure) ~= "table" then
       local strMsg = string.format('ERROR: The input parameter "tArchiveStructure" must be a table.')
       error(strMsg)
@@ -359,14 +358,14 @@ else
     local strParameter = rapidjson.encode(tParameter, { sort_keys=true })
 
     AddJob(
-      strArchivePath,
-      string.format("Archive : %s",strArchivePath),
+      tParameter.strArchivePath,
+      string.format("Archive : %s",tParameter.strArchivePath),
       _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath,strParameter}) -- cmd
     )
 
     -- add all files as dependency that are necessary for the archive
-    AddDependency(strArchivePath, table.unpack(pl.tablex.values(tResolvedArchiveStructure)))
+    AddDependency(tParameter.strArchivePath, table.unpack(pl.tablex.values(tResolvedArchiveStructure)))
 
-    return strArchivePath
+    return tParameter.strArchivePath
   end
 end
