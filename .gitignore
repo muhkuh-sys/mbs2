@@ -1,0 +1,6 @@
+hboot_image_compiler/hboot_image_compiler/elf_support.pyc
+hboot_image_compiler/hboot_image_compiler/hboot_image_version.pyc
+hboot_image_compiler/hboot_image_compiler/hboot_image.pyc
+hboot_image_compiler/hboot_image_compiler/option_compiler.pyc
+hboot_image_compiler/hboot_image_compiler/patch_definitions.pyc
+hboot_image_compiler/hboot_image_compiler/snippet_library.pyc
