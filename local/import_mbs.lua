@@ -5,8 +5,11 @@
 -- for e.g.:
 --[[
 
--- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
-local mbs2 = require "import_mbs"()
+-- Add additonal package paths to the LUA search path -> Neccessary to add mbs2 paths to LUA search path
+local tImport_mbs = require "import_mbs"()
+
+-- a proxy table of the mbs2 folder to load chunk of lua modules
+local mbs2 = tImport_mbs.tProxy
 
 -- load chunk data:
 local tElf_Support = mbs2.utils.elf_support()
@@ -36,37 +39,62 @@ table structure within the proxy table (json):
 --]]
 
 
----------------------------------------------------------------------------------------------------------------------
---
--- SETTINGS:
---
 
 -- Provide Penlight as an upvalue to all functions.
 local pl = require'pl.import_into'()
 
--- additonal package paths
-local tAddPaths =
-{
-  strToolsPath = 'mbs2/tools/?.lua;mbs2/tools/?/init.lua;',
-  strBuilderPath = 'mbs2/builder/?.lua;mbs2/builder/?/init.lua;',
-  strUtilsPath = 'mbs2/utils/?.lua;mbs2/utils/?/init.lua;'
-}
+
+-- Create the Lpeg_Support class.
+local class = pl.class
+local Import_mbs = class()
 
 
-local strRoot = "mbs2/" -- "."
-local tExceptionFolder = pl.Set{"jonchki", "local", "hboot_image_compiler"}
--- in the case of files without extensions use: "no_extension"
-local tExtensions = pl.Set{"lua"}
+function Import_mbs:_init(tAdditionalPaths,strRoot,tExceptionFolder,tExtensions)
+
+  ---------------------------------------------------------------------------------------------------------------------
+  --
+  -- SETTINGS:
+  --
+
+  tAdditionalPaths = tAdditionalPaths or {}
+
+  -- additonal package paths
+  local tAddPaths =
+  {
+   'mbs2/?.lua;mbs2/?/init.lua;', -- mbs1
+    'mbs2/tools/?.lua;mbs2/tools/?/init.lua;', -- tools
+    'mbs2/builder/?.lua;mbs2/builder/?/init.lua;', -- builder
+    'mbs2/utils/?.lua;mbs2/utils/?/init.lua;' -- utils
+  }
+
+  self.tAddPaths = pl.tablex.update(tAddPaths,tAdditionalPaths)
+
+  self.strRoot = strRoot or "mbs2/" -- "."
+  self.tExceptionFolder = pl.Set(tExceptionFolder or {"jonchki", "local", "hboot_image_compiler"})
+  -- in the case of files without extensions use: "no_extension"
+  self.tExtensions = pl.Set(tExtensions or {"lua"})
+
+  self.tProxy = self:run()
+end
+
 
 ---------------------------------------------------------------------------------------------------------------------
 --
--- Auxiliary functions
+-- Lpeg auxiliary pattern and functions
 --
+
 
 local lpeg = require"lpeglabel"
 
 -- Save typing function names with "lpeg" in front of them:
 local P, V, Cg, Ct, Cc, S, R, C, Cf, Cb, Cs = lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs
+
+
+-- Auxiliary function: return a grammar which tries to match the given pattern in a string
+local function Anywhere(Pattern)
+  return P {Pattern + 1 * V(1)}
+end
+
 
 -- Auxiliary function: transform table to set (values)
 local fExtensionsToSet = function(tmatch)
@@ -77,6 +105,7 @@ local fExtensionsToSet = function(tmatch)
 
   return pl.Set(tmatch)
 end
+
 
 local File =
 Ct(
@@ -89,6 +118,7 @@ Ct(
   }
 )
 
+
 local Path =
 Ct(
   P{
@@ -99,6 +129,12 @@ Ct(
     Sep        = P(pl.path.sep)
   }
 )
+
+
+---------------------------------------------------------------------------------------------------------------------
+--
+-- Auxiliary functions
+--
 
 
 --- Load and return chunk of module
@@ -294,17 +330,21 @@ end
 
 ---------------------------------------------------------------------------------------------------------------------
 --
--- Return functions
+-- run function of Import_mbs object
 --
 
-return function()
-  -- Add additonal package paths folder to the LUA search path.
-  for _,strPath in pairs(tAddPaths) do
-    package.path = strPath .. package.path
+
+function Import_mbs:run()
+  -- Add additonal package paths folder to the LUA search path if they are not already available
+  for _,strPath in ipairs(self.tAddPaths) do
+    local tmatch = Anywhere(strPath):match(package.path)
+    if tmatch == nil then
+      package.path = strPath .. package.path
+    end
   end
 
   -- additionally: return mbs2 proxy object wich can load any lua file as chunk in the folder mbs2
-  local tMbs2 = walk_dirTree(strRoot,tExceptionFolder,tExtensions)
+  local tMbs2 = walk_dirTree(self.strRoot,self.tExceptionFolder,self.tExtensions)
 
 
   -- DEBUGGING:
@@ -331,3 +371,6 @@ return function()
 
   return tMbs2
 end
+
+
+return Import_mbs
