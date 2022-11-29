@@ -10,8 +10,11 @@ local Elf_Support = class()
 local pl = require'pl.import_into'()
 local lpeg = require "lpeglabel"
 
--- Add additonal package paths to the LUA search path and return a proxy table of the mbs2 folder to load chunk of lua the modules
-local mbs2 = require "import_mbs"()
+-- Add additonal package paths to the LUA search path -> Neccessary to add mbs2 paths to LUA search path
+local tImport_mbs = require "import_mbs"()
+
+-- a proxy table of the mbs2 folder to load chunk of lua modules
+local mbs2 = tImport_mbs.tProxy
 
 local tLpeg_Support = require "lpeg_support"()
 
@@ -21,8 +24,9 @@ OptionalSpace,Space,Comma =
 lpeg.P, lpeg.V, lpeg.Cg, lpeg.Ct, lpeg.Cc, lpeg.S, lpeg.R, lpeg.C, lpeg.Cf, lpeg.Cb, lpeg.Cs, lpeg.match,
 tLpeg_Support.OptionalSpace,tLpeg_Support.Space,tLpeg_Support.Comma
 
-function Elf_Support:_init()
 
+---
+function Elf_Support:_init()
 
 end
 
