@@ -33,7 +33,8 @@
 
 			-- Copy all jonchki scripts.
 			t:install{
-				['mbs2/local/import_mbs.lua']                                  = '${install_lua_path}/',
+				['mbs2/local/import_mbs.lua']                           = '${install_lua_path}/',
+				['mbs2/local/mbs.lua']                                  = '${install_lua_path}/',
 			}
 
 			return true

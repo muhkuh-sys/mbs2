@@ -1,18 +1,24 @@
-local tEnv, strToolFilePath = ...
-
+-- Provide Penlight as an upvalue to all functions.
 local pl = require'pl.import_into'()
 
+
+---------------------------------------------------------------------------------------------------------------------
+--
+-- Local setup compiler functions
+--
+
+---
 local function setup_compiler_common(tEnv)
   local strToolchainPath = pl.path.abspath(pl.path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3'))
   local strGccPlatform = 'arm-none-eabi'
   -- Set the compiler executables.
-  tEnv.cc.exe_c = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-gcc')
-  tEnv.cc.exe_cxx = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-g++')
-  tEnv.lib.exe = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-ar')
-  tEnv.link.exe = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-ld')
+  tEnv.tEnvDefaultSettings.cc.exe_c = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-gcc')
+  tEnv.tEnvDefaultSettings.cc.exe_cxx = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-g++')
+  tEnv.tEnvDefaultSettings.lib.exe = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-ar')
+  tEnv.tEnvDefaultSettings.link.exe = pl.path.join(strToolchainPath, 'bin', strGccPlatform..'-ld')
 
   -- These are the defines for the compiler.
-  tEnv.cc.flags:Merge {
+  tEnv.tEnvDefaultSettings.cc.flags:Merge {
     '-ffreestanding',
     '-mlong-calls',
     '-Wall',
@@ -49,15 +55,15 @@ local function setup_compiler_common(tEnv)
       table.concat(pl.tablex.keys(atBuildTypeFlags), ',')
     ))
   end
-  tEnv.cc.flags:Merge(atBuildTypeFlags)
+  tEnv.tEnvDefaultSettings.cc.flags:Merge(atBuildTypeFlags)
 
-  tEnv.link.libs = {
+  tEnv.tEnvDefaultSettings.link.libs = {
     'm',
     'c',
     'gcc'
   }
 
-  tEnv.link.flags:Merge{
+  tEnv.tEnvDefaultSettings.link.flags:Merge{
     '--gc-sections',
     '-nostdlib',
     '-static'
@@ -76,22 +82,24 @@ local function setup_compiler_common(tEnv)
 end
 
 
+---
 local function setup_compiler_NETX500(tEnv)
   local path = pl.path
 
   setup_compiler_common(tEnv)
 
-  tEnv.cc.flags:Merge {
+  tEnv.tEnvDefaultSettings.cc.flags:Merge {
     '-march=armv5te',
   }
 
-  tEnv.link.libpath = {
+  tEnv.tEnvDefaultSettings.link.libpath = {
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/arm-none-eabi/lib/v5te/')),
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/lib/gcc/arm-none-eabi/4.7.2/v5te/'))
   }
 end
 
 
+---
 local function setup_compiler_NETX50(tEnv)
   local path = pl.path
 
@@ -99,17 +107,18 @@ local function setup_compiler_NETX50(tEnv)
 
   -- These are the defines for the compiler.
   -- TODO: move this somewhere else, e.g. compiler package.
-  tEnv.cc.flags:Merge {
+  tEnv.tEnvDefaultSettings.cc.flags:Merge {
     '-march=armv5te'
   }
 
-  tEnv.link.libpath = {
+  tEnv.tEnvDefaultSettings.link.libpath = {
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/arm-none-eabi/lib/v5te/')),
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/lib/gcc/arm-none-eabi/4.7.2/v5te/'))
   }
 end
 
 
+---
 local function setup_compiler_NETX56(tEnv)
   local path = pl.path
 
@@ -117,17 +126,18 @@ local function setup_compiler_NETX56(tEnv)
 
   -- These are the defines for the compiler.
   -- TODO: move this somewhere else, e.g. compiler package.
-  tEnv.cc.flags:Merge {
+  tEnv.tEnvDefaultSettings.cc.flags:Merge {
     '-march=armv5te'
   }
 
-  tEnv.link.libpath = {
+  tEnv.tEnvDefaultSettings.link.libpath = {
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/arm-none-eabi/lib/v5te/')),
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/lib/gcc/arm-none-eabi/4.7.2/v5te/'))
   }
 end
 
 
+---
 local function setup_compiler_NETX10(tEnv)
   local path = pl.path
 
@@ -135,18 +145,35 @@ local function setup_compiler_NETX10(tEnv)
 
   -- These are the defines for the compiler.
   -- TODO: move this somewhere else, e.g. compiler package.
-  tEnv.cc.flags:Merge {
+  tEnv.tEnvDefaultSettings.cc.flags:Merge {
     '-march=armv5te'
   }
 
-  tEnv.link.libpath = {
+  tEnv.tEnvDefaultSettings.link.libpath = {
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/arm-none-eabi/lib/v5te/')),
     path.abspath(path.expanduser('~/.mbs/depack/org.gnu.gcc/gcc-arm-none-eabi/gcc-arm-none-eabi-4.7.2_3/lib/gcc/arm-none-eabi/4.7.2/v5te/'))
   }
 end
 
 
-tEnv.atRegisteredCompiler['NETX500'] = setup_compiler_NETX500
-tEnv.atRegisteredCompiler['NETX50'] = setup_compiler_NETX50
-tEnv.atRegisteredCompiler['NETX56'] = setup_compiler_NETX56
-tEnv.atRegisteredCompiler['NETX10'] = setup_compiler_NETX10
+---------------------------------------------------------------------------------------------------------------------
+--
+-- setup compiler object functions
+--
+
+
+-- Create the Setup_Compiler class.
+local class = pl.class
+local Setup_Compiler = class()
+
+function Setup_Compiler:_init(tEnv)
+  tEnv.atRegisteredCompiler['NETX500'] = setup_compiler_NETX500
+  tEnv.atRegisteredCompiler['NETX50'] = setup_compiler_NETX50
+  tEnv.atRegisteredCompiler['NETX56'] = setup_compiler_NETX56
+  tEnv.atRegisteredCompiler['NETX10'] = setup_compiler_NETX10
+end
+
+
+return Setup_Compiler
+
+
