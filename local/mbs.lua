@@ -79,7 +79,7 @@ function SubBAM(strPath,...)
   end
 
   local bStatus, SubBAM = pcall(tChunk)
-  if bStatus == nil then
+  if bStatus ~= true then
     local strMsg = string.format('ERROR: Failed to call the script "%s": %s', strSubScript, SubBAM)
     error(strMsg)
   end
@@ -313,7 +313,7 @@ function EnvDefault:AddBuilder(strMbsBuilderPath)
       end
 
       bStatus, Builder = pcall(tChunk)
-      if bStatus == nil then
+      if bStatus ~= true then
         local strMsg = string.format('ERROR: Failed to call the script "%s": %s', tBuilderModule.EnvDefault.AbsPath, Builder)
         error(strMsg)
       end
@@ -491,7 +491,7 @@ function EnvDefault:CreateEnvironment(astrTools)
       --    TableUnlock(tEnv)
 
       bStatus, Setup_Compiler = pcall(tChunk)
-      if bStatus == nil then
+      if bStatus ~= true then
         local strMsg = string.format('ERROR: Failed to call the script "%s": %s', strPath, Setup_Compiler)
         error(strMsg)
       end

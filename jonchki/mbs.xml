@@ -31,7 +31,7 @@
 			-- pl.pretty.dump(t)
 			-- pl.pretty.dump(t.atReplacements)
 
-			-- Copy all jonchki scripts.
+			-- Copy all mbs2 scripts to the installation path.
 			t:install{
 				['mbs2/local/import_mbs.lua']                           = '${install_lua_path}/',
 				['mbs2/local/mbs.lua']                                  = '${install_lua_path}/',
