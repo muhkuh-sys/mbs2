@@ -174,9 +174,14 @@ function EnvDefault:VersionTemplate(strTarget, strInput, atExtraReplacements)
     error(strMsg)
   end
 
-  local strGitDescription = getGitDescription('.')
-  local strProjectVersionVcs, strProjectVersionVcsLong = parseGitID(strGitDescription)
-  -- print(strProjectVersionVcs, strProjectVersionVcsLong)
+  local strProjectVersionVcs, strProjectVersionVcsLong
+  local fResult, strGitDescription = pcall(getGitDescription, '.')
+  if fResult then
+    strProjectVersionVcs, strProjectVersionVcsLong = parseGitID(strGitDescription)
+    -- print(strProjectVersionVcs, strProjectVersionVcsLong)
+  else
+    strProjectVersionVcs, strProjectVersionVcsLong = 'unknown', 'unknown'
+  end
 
   local atReplacement = {
     PROJECT_VERSION_MAJOR = self.atVars.PROJECT_VERSION[1],
