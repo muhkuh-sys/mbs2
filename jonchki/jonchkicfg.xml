@@ -1,7 +1,7 @@
 <jonchkicfg>
 	<repositories>
 		<repository id="local" type="file" cacheable="false">
-			<root>mbs/jonchki/local_repository</root>
+			<root>mbs2/jonchki/local_repository</root>
 			<versions>[group]/[module]</versions>
 			<config>[group]/[module]/[version]/[artifact]-[version][platform].[extension]</config>
 			<artifact>[group]/[module]/[version]/[artifact]-[version][platform].[extension]</artifact>
