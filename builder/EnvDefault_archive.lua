@@ -193,7 +193,7 @@ function EnvDefault:Archive(strArchivePath,strFormat,tFilter,tArchiveStructure)
       )
         error(strMsg)
       end
-      tFilterNumb[uiKey] = atFilter_Archive[string.upper(strFormat)]
+      tFilterNumb[uiKey] = atFilter_Archive[string.upper(strFilter)]
     end
   end
 
