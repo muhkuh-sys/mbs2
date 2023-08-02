@@ -671,4 +671,4 @@ function EnvDefault:SetLibPrefix(strPrefix)
 end
 
 
-return EnvDefault
+return { DEFAULT=EnvDefault() }
