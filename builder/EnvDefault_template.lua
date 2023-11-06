@@ -210,7 +210,7 @@ function EnvDefault:VersionTemplate(strTarget, strInput, atExtraReplacements)
 
   AddJob(
     tFilterParameter.output, -- output
-    string.format('VersionTemplate %s', tFilterParameter.input), -- label
+    string.format('VersionTemplate %s', tFilterParameter.output), -- label
     _bam_exe .. " " .. pl.utils.quote_arg({"-e", strBuilderPath, strFilterParameter}) -- cmd
   )
 
