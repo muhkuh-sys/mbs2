@@ -1,5 +1,10 @@
 #! /bin/bash
 
+OVERRIDE_CONFIG=~/.mbs2/overrides.cfg
+if [ -f "$OVERRIDE_CONFIG" ]; then
+    . $OVERRIDE_CONFIG
+fi
+
 # FIXME: Get this from a config file.
 JONCHKI_VERSION=0.0.9.1
 HOST_REPOSITORY=~/.mbs2
@@ -54,6 +59,23 @@ fi
 if [ -z "${HOST_DISTRIBUTION_VERSION}" ]; then
   echo "Failed to detect the distribution version."
   exit -1
+fi
+
+# ---------------------------------------------------------------------------
+#
+# Apply overrides.
+#
+if [ -n "$HOST_DISTRIBUTION_ID_OVERRIDE" ]; then
+    echo "Overriding the host distribution ID for MBS from $HOST_DISTRIBUTION_ID to $HOST_DISTRIBUTION_ID_OVERRIDE ."
+    HOST_DISTRIBUTION_ID=$HOST_DISTRIBUTION_ID_OVERRIDE
+fi
+if [ -n "$HOST_DISTRIBUTION_VERSION_OVERRIDE" ]; then
+    echo "Overriding the host distribution version for MBS from $HOST_DISTRIBUTION_VERSION to $HOST_DISTRIBUTION_VERSION_OVERRIDE ."
+    HOST_DISTRIBUTION_VERSION=$HOST_DISTRIBUTION_VERSION_OVERRIDE
+fi
+if [ -n "$HOST_ARCHITECTURE_OVERRIDE" ]; then
+    echo "Overriding the host architecture for MBS from $HOST_ARCHITECTURE to $HOST_ARCHITECTURE_OVERRIDE ."
+    HOST_ARCHITECTURE=$HOST_ARCHITECTURE_OVERRIDE
 fi
 
 # ---------------------------------------------------------------------------
@@ -123,7 +145,7 @@ if [ "${INSTALLED_JONCHKI_VERSION}" != "v${JONCHKI_VERSION}" ]; then
 fi
 
 # Run jonchki.
-${JONCHKI_TOOL} install-dependencies --verbose WARNING --syscfg mbs2/jonchki/jonchkisys.cfg --prjcfg mbs2/jonchki/jonchkicfg.xml --dependency-log mbs2/jonchki/dependency-log.xml --logfile targets/jonchki/jonchki.log --project-root . mbs2/jonchki/mbs.xml 
+${JONCHKI_TOOL} install-dependencies --verbose WARNING --syscfg mbs2/jonchki/jonchkisys.cfg --prjcfg mbs2/jonchki/jonchkicfg.xml --dependency-log mbs2/jonchki/dependency-log.xml --logfile targets/jonchki/jonchki.log --project-root . --distribution-id ${HOST_DISTRIBUTION_ID} --distribution-version ${HOST_DISTRIBUTION_VERSION} --cpu-architecture ${HOST_ARCHITECTURE} mbs2/jonchki/mbs.xml
 if [ $? -ne 0 ]; then
   exit -1
 fi
