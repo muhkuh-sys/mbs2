@@ -11,34 +11,28 @@ local GCC_Symbol_Template = class()
 
 ---
 function GCC_Symbol_Template:_init()
-  self.pl = require'pl.import_into'()
-  local rapidjson = require 'rapidjson'
-
   -- Add additonal package paths to the LUA search path -> Neccessary to add mbs2 paths to LUA search path
   self.tImport_mbs = require "import_mbs"()
 
   -- a proxy table of the mbs2 folder to load chunk of lua modules
   self.mbs2 = self.tImport_mbs.tProxy
 
-  self.tElf_Support =  require "elf_support"()
-  self.tLpeg_Support =  require "lpeg_support"()
-
-
   -- input argument by BAM calling this module
   local strParameter = _bam_targets[0]
 
+  local rapidjson = require 'rapidjson'
   local tParameter, strParameterError = rapidjson.decode(strParameter)
   if tParameter==nil then
     local strMsg = string.format('ERROR: Failed to decode the input parameter "%s": %s', strParameter, strParameterError)
     error(strMsg)
   end
 
-  self.tEnvCmdTemplates,self.strSourceElf,self.strTarget,self.strGCC_Symbol_Template,self.strGCC_Symbol_Binfile =
+  self.tEnvCmdTemplates,self.strSourceElf,self.strTarget,self.strGCC_Symbol_Template,self.strPattern =
     tParameter.tEnvCmdTemplates,
     tParameter.strSourceElf,
     tParameter.strTarget,
     tParameter.strGCC_Symbol_Template,
-    tParameter.strGCC_Symbol_Binfile
+    tParameter.strPattern
 
 end
 
@@ -66,19 +60,16 @@ end
 
 ---
 function GCC_Symbol_Template:run()
-  local tElf_Support = self.tElf_Support
-  local pl = self.pl
-  local tLpeg_Support = self.tLpeg_Support
-
-  local tEnvCmdTemplates,strSourceElf,strTarget,strGCC_Symbol_Template,strGCC_Symbol_Binfile =
+  local tEnvCmdTemplates,strSourceElf,strTarget,strGCC_Symbol_Template,strPattern =
   self.tEnvCmdTemplates,
   self.strSourceElf,
   self.strTarget,
   self.strGCC_Symbol_Template,
-  self.strGCC_Symbol_Binfile
+  self.strPattern
 
 
   -- Get the symbol table from the elf.
+  local tElf_Support =  require "elf_support"()
   local atSymbols = tElf_Support:get_symbol_table(tEnvCmdTemplates,strSourceElf)
 
   -- Get the macros from the ELF file.
@@ -103,17 +94,18 @@ function GCC_Symbol_Template:run()
   --TODO:  Add here: "Search and replace the special "%PROGRAM_DATA%" pattern."
 
   -- Read the template.
-  local strTemplate, strError = pl.utils.readfile(strGCC_Symbol_Template, false)
+  local utils = require 'pl.utils'
+  local strTemplate, strError = utils.readfile(strGCC_Symbol_Template, false)
   if strTemplate==nil then
     local strMsg = string.format('ERROR: Failed to read templete "%s": %s', strGCC_Symbol_Template, strError)
     error(strMsg)
   end
 
   -- Replace all symbols in the template.
-  local strResult = tLpeg_Support:Gsub(strTemplate,nil,atSymbols)
+  local strResult = string.gsub(strTemplate, strPattern, atSymbols)
 
   -- Write the result.
-  local tWriteResult, strWriteError = pl.utils.writefile(strTarget, strResult, true)
+  local tWriteResult, strWriteError = utils.writefile(strTarget, strResult, true)
   if tWriteResult~=true then
     local strMsg = string.format('ERROR: Failed to write the output file "%s": %s', strTarget, strWriteError)
     error(strMsg)
