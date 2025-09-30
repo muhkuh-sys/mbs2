@@ -18,7 +18,7 @@
 		<dependency group="com.github.sqmedeiros" module="lpeglabel" artifact="lua5.4-lpeglabel" version="1.6.0.2"/>
 		<dependency group="com.github.tieske" module="date" artifact="date" version="2.2.1"/>
 		<dependency group="com.github.tieske" module="lua-resty-ljsonschema" artifact="lua-resty-ljsonschema" version="1.1.6.1"/>
-		<dependency group="com.github.xpol" module="lua-rapidjson" artifact="lua5.4-lua-rapidjson" version="0.7.1.1"/>
+		<dependency group="com.github.xpol" module="rapidjson" artifact="lua5.4-rapidjson" version="0.7.1.2"/>
 		<dependency group="org.lua" module="lua" artifact="lua" version="5.4.4.1"/>
 		<dependency group="org.luajit" module="bitop" artifact="lua5.4-bitop" version="1.0.3"/>
 		<dependency group="org.muhkuh.lua" module="archive" artifact="lua5.4-archive" version="0.0.2.2"/>
