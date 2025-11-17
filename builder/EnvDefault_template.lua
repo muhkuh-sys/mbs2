@@ -76,6 +76,7 @@ end
 local function parseGitID(strGitId)
   local strProjectVersionVcs = 'unknown'
   local strProjectVersionVcsLong = 'unknown'
+  local fIsTagged = false
 
   -- print(string.format('Parsing GIT description "%s".', strGitId))
   local tMatch = string.match(strGitId, '^%x%x%x%x%x%x%x%x%x%x%x%x%+?$')
@@ -91,6 +92,7 @@ local function parseGitID(strGitId)
         -- print(string.format('This is a repository which is exactly on a tag without modification. Use the tag name.'))
         strProjectVersionVcs = string.format('v%s%s', strVersion, strDirty)
         strProjectVersionVcsLong = string.format('v%s-%s%s', strVersion, strHash, strDirty)
+        fIsTagged = true
       else
         -- print(string.format('This is a repository with commits after the last tag. Use the hash.'))
         strProjectVersionVcs = string.format('%s%s', strHash, strDirty)
@@ -109,7 +111,7 @@ local function parseGitID(strGitId)
 --  print(string.format('PROJECT_VERSION_VCS = "%s"', strProjectVersionVcs))
 --  print(string.format('PROJECT_VERSION_VCS_LONG = "%s"', strProjectVersionVcsLong))
 
-  return strProjectVersionVcs, strProjectVersionVcsLong
+  return strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged
 end
 
 
@@ -174,13 +176,17 @@ function EnvDefault:VersionTemplate(strTarget, strInput, atExtraReplacements)
     error(strMsg)
   end
 
-  local strProjectVersionVcs, strProjectVersionVcsLong
+  local strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged
   local fResult, strGitDescription = pcall(getGitDescription, '.')
   if fResult then
-    strProjectVersionVcs, strProjectVersionVcsLong = parseGitID(strGitDescription)
-    -- print(strProjectVersionVcs, strProjectVersionVcsLong)
+    strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = parseGitID(strGitDescription)
   else
-    strProjectVersionVcs, strProjectVersionVcsLong = 'unknown', 'unknown'
+    strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = 'unknown', 'unknown', false
+  end
+
+  local strSnapshot = ''
+  if fIsTagged==false then
+    strSnapshot = '-SNAPSHOT'
   end
 
   local atReplacement = {
@@ -190,10 +196,11 @@ function EnvDefault:VersionTemplate(strTarget, strInput, atExtraReplacements)
     PROJECT_VERSION_VCS = strProjectVersionVcs,
     PROJECT_VERSION_VCS_LONG = strProjectVersionVcsLong,
     PROJECT_VERSION = string.format(
-      '%s.%s.%s',
+      '%s.%s.%s%s',
       self.atVars.PROJECT_VERSION[1],
       self.atVars.PROJECT_VERSION[2] or '0',
-      self.atVars.PROJECT_VERSION[3] or '0'
+      self.atVars.PROJECT_VERSION[3] or '0',
+      strSnapshot
     )
   }
   if atExtraReplacements~=nil then
