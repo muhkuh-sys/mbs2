@@ -28,8 +28,10 @@ cMbs.tools = atRegisteredools
 -- Collect all standard builders.
 --
 local astrStandardBuilders = {
+  'Bin2Obj',
   'gcc',
-  'hboot_image'
+  'hboot_image',
+  'Elf2Bin'
 }
 local atStandardBuilders = {}
 for _, strBuilder in ipairs(astrStandardBuilders) do
