@@ -34,8 +34,7 @@
 
 			-- Copy all mbs2 scripts to the installation path.
 			t:install{
-				['mbs2/local/import_mbs.lua']                           = '${install_lua_path}/',
-				['mbs2/local/mbs.lua']                                  = '${install_lua_path}/',
+				['mbs2/local/']                           = '${install_lua_path}/'
 			}
 
 			return true

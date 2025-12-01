@@ -1,3 +1,5 @@
+* Clean räumt nicht das MAP file bei einem ELF weg.
+
 * Welche Module sollen vom vorherigen mbs noch übernommen werden?
 * Bisherige Funktionen in mbs2 aufteilen auf mehrere Module?
 * LDOC hinzufpügen
