@@ -9,6 +9,14 @@ local atstrTargetFlags = {
   ['NETX90'] = {
       '-mcpu=cortex-m4',
       '-mthumb'
+  },
+  ['NETX9X2_COM_MPW'] = {
+    '-mcpu=cortex-a32',
+    '-mthumb'
+  },
+  ['NETX9X2_SECENC_MPW'] = {
+    '-mcpu=cortex-m0plus',
+    '-mthumb'
   }
 }
 
