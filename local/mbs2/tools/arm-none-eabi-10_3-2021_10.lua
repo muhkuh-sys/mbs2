@@ -7,18 +7,35 @@ local tTool = {
 
 local atstrTargetFlags = {
   ['NETX90'] = {
+    ccflags = {
       '-mcpu=cortex-m4',
       '-mthumb'
+    },
+    -- Use the ccflags also for the linker.
+    ldflags = nil
   },
+
   ['NETX9X2_COM_MPW'] = {
-    '-mcpu=cortex-a32',
-    '-mthumb',
-    -- Do not build code with unaligned accesses. They result in an exception.
-    '-mno-unaligned-access'
+    ccflags = {
+      '-mcpu=cortex-a32',
+      '-mthumb',
+      -- Do not build code with unaligned accesses. They result in an exception.
+      '-mno-unaligned-access'
+    },
+    -- Do not use the special v8-a libraries, as it uses unaligned accesses.
+    ldflags = {
+      '-mthumb',
+      '-mno-unaligned-access'
+    }
   },
+
   ['NETX9X2_SECENC_MPW'] = {
-    '-mcpu=cortex-m0plus',
-    '-mthumb'
+    ccflags = {
+      '-mcpu=cortex-m0plus',
+      '-mthumb'
+    },
+    -- Use the ccflags also for the linker.
+    ldflags = nil
   }
 }
 
@@ -32,8 +49,8 @@ function tTool:applyToEnv(tEnv, tCfg)
   else
     error('No "asic_typ" found in the configuration.')
   end
-  local astrTargetFlags = atstrTargetFlags[strAsicTyp]
-  if astrTargetFlags==nil then
+  local atTargetFlags = atstrTargetFlags[strAsicTyp]
+  if atTargetFlags==nil then
     error('Unsupported ASIC typ: ' .. strAsicTyp)
   end
 
@@ -52,7 +69,7 @@ function tTool:applyToEnv(tEnv, tCfg)
     bfdname = 'elf32-littlearm',
     bfdarch = 'ARM',
     toolchain_exe_prefix = strToolchainExePrefix,
-    target_flags = astrTargetFlags
+    target_flags = atTargetFlags
   }
   local tGccToolchainBase = require 'mbs2.tools.gcc-toolchain-base'
   tGccToolchainBase:applyStandardGcc(tEnv, atToolchainCfg)

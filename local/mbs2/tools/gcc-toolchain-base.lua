@@ -35,9 +35,14 @@ function cGccToolchainBase:applyStandardGcc(tEnv, tCfg)
   }
   tEnv.cc.flags:Merge(astrCCFlags)
 
-  local astrTargetFlags = tCfg.target_flags
-  tEnv.cc.flags:Merge(astrTargetFlags)
-  tEnv.link.flags:Merge(astrTargetFlags)
+  local atTargetFlags = tCfg.target_flags
+  local astrTargetFlagsCC = atTargetFlags.ccflags
+  local astrTargetFlagsLD = atTargetFlags.ldflags
+  if astrTargetFlagsLD==nil then
+    astrTargetFlagsLD = astrTargetFlagsCC
+  end
+  tEnv.cc.flags:Merge(astrTargetFlagsCC)
+  tEnv.link.flags:Merge(astrTargetFlagsLD)
 
   local astrLdPassFlags = {
     '--gc-sections',
