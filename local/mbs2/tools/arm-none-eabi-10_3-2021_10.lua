@@ -12,7 +12,9 @@ local atstrTargetFlags = {
   },
   ['NETX9X2_COM_MPW'] = {
     '-mcpu=cortex-a32',
-    '-mthumb'
+    '-mthumb',
+    -- Do not build code with unaligned accesses. They result in an exception.
+    '-mno-unaligned-access'
   },
   ['NETX9X2_SECENC_MPW'] = {
     '-mcpu=cortex-m0plus',
@@ -56,6 +58,7 @@ function tTool:applyToEnv(tEnv, tCfg)
   tGccToolchainBase:applyStandardGcc(tEnv, atToolchainCfg)
 
   -- Add special settings for this compiler.
+  -- Set the standard to C17 to get static assertions.
   tEnv.cc.flags:Add('-std=c17')
 
   return true
