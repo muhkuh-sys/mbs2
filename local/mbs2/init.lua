@@ -168,8 +168,31 @@ function cMbs:createEnv(strID, atRequiredTools, tCfg)
   -- Add the "mbs" table as a key-value store which can be used in builders.
   -- Populate it with a st of known values from the configuration, like the asic typ.
   tEnv.mbs = {
-    ASIC_TYP = tCfg.asic_typ
+    ASIC_TYP = tCfg.asic_typ,
+    PROJECT_VERSION = self.astrProjectVersion
   }
+
+  -- Add a helper for builders running a Lua task.
+  function tEnv:addLuaJob(strBuilderModule, strJobName, strOutputPath, tJobParameter)
+    local rapidjson = require 'rapidjson'
+    local strJobParameter = rapidjson.encode(tJobParameter, { sort_keys=true })
+
+    local strLabelPrefix = self.labelprefix or ''
+    strLabelPrefix = strLabelPrefix .. strJobName
+
+    local path = require 'pl.path'
+    local strBamInstallPath = path.dirname(_bam_exe)
+    local strRunBuilderModuleAbs = path.join(strBamInstallPath, 'lua', 'mbs2', 'run_builder.lua')
+    local strRunBuilderModule = path.relpath(strRunBuilderModuleAbs)
+
+    local utils = require 'pl.utils'
+    local strBamArguments = utils.quote_arg({'-e', strRunBuilderModule, 'id='..strBuilderModule, 'args='..strJobParameter})
+    AddJob(
+      strOutputPath,
+      strLabelPrefix .. ' ' .. strOutputPath,
+      _bam_exe .. ' -t ' .. strBamArguments
+    )
+  end
 
   -- Aply all required tools.
   if type(atRequiredTools)=='table' then
