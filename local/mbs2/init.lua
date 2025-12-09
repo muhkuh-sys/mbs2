@@ -1,5 +1,63 @@
 local cMbs = {}
 
+-- Collect environments in this table.
+cMbs.atEnv = {}
+
+-- Read the settings file.
+function cMbs:__readSettings()
+  local utils = require 'pl.utils'
+  local cfg_strSettingsFile = 'setup.json'
+  local tSettings
+  local strSettingsJson, strSettingsReadError = utils.readfile(cfg_strSettingsFile, false)
+  if strSettingsJson==nil then
+    print(
+      'WARNING: Failed to read the settings from "' .. cfg_strSettingsFile .. '": ' ..
+      tostring(strSettingsReadError)
+    )
+  else
+    local rapidjson = require 'rapidjson'
+    local tS, strSettingsDecodeError = rapidjson.decode(strSettingsJson)
+    if tS==nil then
+      print(
+        'WARNING: Failed to decode the settings from "' .. cfg_strSettingsFile .. '" as JSON: ' ..
+        tostring(strSettingsDecodeError)
+      )
+    else
+      tSettings = tS
+    end
+  end
+  local tDefaultSettings = {
+    project = {
+      version = "0.0.0"
+    }
+  }
+  if tSettings==nil then
+    print('WARNING: using defauls for the settings.')
+    tSettings = tDefaultSettings
+  end
+
+  -- Extract the project version.
+  local strProjectVersion
+  if type(tSettings.project)=='table' and type(tSettings.project.version)=='string' then
+    strProjectVersion = tSettings.project.version
+  else
+    print('WARNING: the setting have no project version. Using the default value.')
+    strProjectVersion = tDefaultSettings.project.version
+  end
+  -- Split the project version by dots.
+  local astrProjectVersion = require 'pl.stringx'.split(strProjectVersion, '.')
+  -- Make sure that the project version has at least 3 digits.
+  repeat
+    local sizProjectVersion = #astrProjectVersion
+    if sizProjectVersion<3 then
+      table.insert(astrProjectVersion, '0')
+    end
+  until sizProjectVersion>=3
+  self.astrProjectVersion = astrProjectVersion
+end
+
+
+
 ----------------------------------------------------------------------------------------------------------------------
 --
 -- Collect all registered tools.
@@ -7,43 +65,53 @@ local cMbs = {}
 --        installation folder somewhere else. This is quite different from the old "mbs" system where tools were
 --        installed automatically.
 --
-local astrRegisteredTools = {
-  'arm-none-eabi-10_3-2021_10'
-}
-local path = require 'pl.path'
-local atRegisteredools = {}
-for _, strTool in ipairs(astrRegisteredTools) do
-  local strModulePath = path.join('mbs2', 'tools', strTool)
-  local fReqireResult, tTool = pcall(require, strModulePath)
-  if fReqireResult~=true then
-    error('Failed to load the tool "' .. strTool .. '": ' .. tostring(tTool))
-  else
-    table.insert(atRegisteredools, tTool)
+function cMbs:__collectRegisteredTools()
+  local astrRegisteredTools = {
+    'arm-none-eabi-10_3-2021_10'
+  }
+  local path = require 'pl.path'
+  local atRegisteredTools = {}
+  for _, strTool in ipairs(astrRegisteredTools) do
+    local strModulePath = path.join('mbs2', 'tools', strTool)
+    local fReqireResult, tTool = pcall(require, strModulePath)
+    if fReqireResult~=true then
+      error('Failed to load the tool "' .. strTool .. '": ' .. tostring(tTool))
+    else
+      table.insert(atRegisteredTools, tTool)
+    end
   end
+  self.tools = atRegisteredTools
 end
-cMbs.tools = atRegisteredools
+
+
 
 ----------------------------------------------------------------------------------------------------------------------
 --
 -- Collect all standard builders.
 --
-local astrStandardBuilders = {
-  'Bin2Obj',
-  'gcc',
-  'hboot_image',
-  'Elf2Bin'
-}
-local atStandardBuilders = {}
-for _, strBuilder in ipairs(astrStandardBuilders) do
-  local strModulePath = path.join('mbs2', 'builder', strBuilder)
-  local fReqireResult, tBuilder = pcall(require, strModulePath)
-  if fReqireResult~=true then
-    error('Failed to load the builder "' .. strBuilder .. '": ' .. tostring(tBuilder))
-  else
-    table.insert(atStandardBuilders, tBuilder)
+function cMbs:__collectStandardBuilders()
+  local astrStandardBuilders = {
+    'Bin2Obj',
+    'Elf2Bin',
+    'GCCSymbolTemplate',
+    'gcc',
+    'hboot_image',
+    'Version'
+  }
+  local atStandardBuilders = {}
+  local path = require 'pl.path'
+  for _, strBuilder in ipairs(astrStandardBuilders) do
+    local strModulePath = path.join('mbs2', 'builder', strBuilder)
+    local fReqireResult, tBuilder = pcall(require, strModulePath)
+    if fReqireResult~=true then
+      error('Failed to load the builder "' .. strBuilder .. '": ' .. tostring(tBuilder))
+    else
+      table.insert(atStandardBuilders, tBuilder)
+    end
   end
+  self.builder = atStandardBuilders
 end
-cMbs.builder = atStandardBuilders
+
 
 
 --- Lookup a tool by the ID and a prefix for the version.
@@ -239,5 +307,9 @@ function cMbs:cloneAnyEnv(tCfg)
   return tEnv
 end
 
+
+cMbs:__readSettings()
+cMbs:__collectRegisteredTools()
+cMbs:__collectStandardBuilders()
 
 return cMbs
