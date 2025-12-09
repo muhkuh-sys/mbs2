@@ -6,10 +6,34 @@ local tTool = {
 
 
 local atstrTargetFlags = {
+  ['NETX50'] = {
+    ccflags = {
+      '-mcpu=arm966e-s'
+    },
+    -- Use the ccflags also for the linker.
+    ldflags = nil
+  },
+
+  ['NETX56'] = {
+    ccflags = {
+      '-mcpu=arm966e-s'
+    },
+    -- Use the ccflags also for the linker.
+    ldflags = nil
+  },
+
   ['NETX90'] = {
     ccflags = {
       '-mcpu=cortex-m4',
       '-mthumb'
+    },
+    -- Use the ccflags also for the linker.
+    ldflags = nil
+  },
+
+  ['NETX500'] = {
+    ccflags = {
+      '-mcpu=arm926ej-s'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
