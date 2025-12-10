@@ -94,6 +94,10 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     self.mbs.TRANSLATE_FILENAME_INPUT_PREFIX = strInputPrefix
   end
 
+  function tEnv:AddIncludes(...)
+    self.cc.includes:Merge(...)
+  end
+
   function tEnv:Compile(...)
     return Compile(self, ...)
   end
