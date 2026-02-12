@@ -15,13 +15,14 @@ HOST_REPOSITORY=~/.mbs2
 #
 
 # Get the CPU architecture with the "lscpu" command.
-CPUARCH=$(lscpu | awk -F'Architecture:' '{print $2}' | xargs)
+CPUARCH=$(dpkg --print-architecture)
 # Translate a few older CPUs to a (hopefully) compatible architecture.
 declare -A arch2bits=(
   ["i386"]="x86"
   ["i486"]="x86"
   ["i586"]="x86"
   ["i686"]="x86"
+  ["amd64"]="x86_64"
 )
 HOST_ARCHITECTURE="${arch2bits[$CPUARCH]}"
 if [ -z "${HOST_ARCHITECTURE}" ]; then
