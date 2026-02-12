@@ -6,7 +6,7 @@ if [ -f "$OVERRIDE_CONFIG" ]; then
 fi
 
 # FIXME: Get this from a config file.
-JONCHKI_VERSION=0.0.12.1
+JONCHKI_VERSION=0.0.13.1
 HOST_REPOSITORY=~/.mbs2
 
 # ---------------------------------------------------------------------------
