@@ -185,9 +185,9 @@ function EnvDefault:VersionTemplate(strTarget, strInput, atExtraReplacements)
   end
 
   local strSnapshot = ''
-  if fIsTagged==false then
-    strSnapshot = '-SNAPSHOT'
-  end
+--  if fIsTagged==false then
+--    strSnapshot = '-SNAPSHOT'
+--  end
 
   local atReplacement = {
     PROJECT_VERSION_MAJOR = self.atVars.PROJECT_VERSION[1],
