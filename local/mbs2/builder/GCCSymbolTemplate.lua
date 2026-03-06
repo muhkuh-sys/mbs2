@@ -117,6 +117,8 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     -- The generated file depends on the ELF file and the template.
     AddDependency(strOutputPath, strInputElfPath)
     AddDependency(strOutputPath, strInputTemplate)
+
+    return strOutputPath
   end
 
   return true
