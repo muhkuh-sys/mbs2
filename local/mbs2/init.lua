@@ -263,6 +263,25 @@ end
 
 
 
+--- Test if all environments exist.
+--- @param astrID string[] The list of environment IDs to check.
+--- @return boolean fHasAll # true if all environments specified in astrID exist, false otherwise.
+--- @return string[] astrMissingEnvs # A list of all missing environments. The list is empty if all environments exisist.
+function cMbs:hasAllEnvs(astrID)
+  local fHasAll = true
+  local astrMissingEnvs = {}
+  for _, strID in ipairs(astrID) do
+    local fHas = self:hasEnv(strID)
+    fHasAll = fHasAll and fHas
+    if not fHas then
+      table.insert(astrMissingEnvs, strID)
+    end
+  end
+  return fHasAll, astrMissingEnvs
+end
+
+
+
 function cMbs:cloneEnv(strID, tCfg)
   local tEnvMaster = self.atEnv[strID]
   if tEnvMaster==nil then
@@ -282,14 +301,27 @@ end
 
 
 
-function cMbs:mergeEnv(tID, atKeyValuePairs)
+local function __getEnvID(tID)
   local strID
+  local strError
+
   if type(tID)=='string' then
     strID = tID
   elseif type(tID)=='table' and type(tID.mbs_id)=='string' then
     strID = tID.mbs_id
   else
-    error('First argument must be a string or an environment object.')
+    strError = 'The ID must be a string or an environment object.'
+  end
+
+  return strID, strError
+end
+
+
+
+function cMbs:mergeEnv(tID, atKeyValuePairs)
+  local strID, strErrorID = __getEnvID(tID)
+  if strID==nil then
+    error('Failed to get the ID of the environment: ' .. tostring(strErrorID))
   end
 
   local tEnv = self.atEnv[strID]
@@ -303,6 +335,45 @@ function cMbs:mergeEnv(tID, atKeyValuePairs)
   end
 
   return tEnv
+end
+
+
+
+function cMbs:getKeyFromEnv(tID, strKey)
+  local strID, strErrorID = __getEnvID(tID)
+  if strID==nil then
+    error('Failed to get the ID of the environment: ' .. tostring(strErrorID))
+  end
+
+  local tEnv = self.atEnv[strID]
+  if tEnv==nil then
+    error('An environment with the ID "' .. strID .. '" was not found.')
+  end
+
+  local tMbs = tEnv.mbs
+  local tValue = tMbs[strKey]
+  if tValue==nil then
+    error('The environment with the ID "' .. strID .. '" has no key "' .. strKey .. '".')
+  end
+
+  return tValue
+end
+
+
+
+--- Create a map of the environment ID to the value of a key for a list of environments.
+--- @param astrID string[] The list of environment IDs to process.
+--- @param strKey string The key to extract from the environments.
+--- @return { [string]: any } atMap # A map of the environment ID to the key value.
+function cMbs:mapIDtoKey(astrID, strKey)
+  local atMap = {}
+  for _, strID in ipairs(astrID) do
+    if self:hasEnv(strID) then
+      local tValue = self:getKeyFromEnv(strID, strKey)
+      atMap[strID] = tValue
+    end
+  end
+  return atMap
 end
 
 
