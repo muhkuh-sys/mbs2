@@ -175,6 +175,10 @@ function tBuilder:applyToEnv(tEnv, tCfg)
       pattern = strPattern
     }
     self:addLuaJob(strBuilderId, strBuilderId, strOutputPath, tJobParameter)
+
+    AddDependency(strOutputPath, strInputPath)
+
+    return strOutputPath
   end
 
   return true
