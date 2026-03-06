@@ -91,10 +91,12 @@ end
 --
 function cMbs:__collectStandardBuilders()
   local astrStandardBuilders = {
+    'Archive',
     'Bin2Obj',
     'Elf2Bin',
     'GCCSymbolTemplate',
     'gcc',
+    'Hash',
     'hboot_image',
     'Version'
   }
