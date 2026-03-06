@@ -58,7 +58,6 @@ function tBuilder:__addContents(tArchive, tReader, tArchiveContents, astrPathEle
       -- Add the directory name to the list of path elements.
       table.insert(astrPathElements, tEntry.name)
       -- Recurse into the directory structure.
-      print('*** Dive into ' .. tEntry.name)
       fResult, strError = self:__addContents(tArchive, tReader, tEntry.contents, astrPathElements)
       -- Stop processing the contents if an error occured.
       if fResult~=true then
@@ -96,7 +95,6 @@ function tBuilder:__addContents(tArchive, tReader, tArchiveContents, astrPathEle
           )
         end
         tArchiveEntry:set_pathname(strPathAndName)
-        print('Adding "' .. strPathAndName .. '".')
 
         local tArcResult = tArchive:write_header(tArchiveEntry)
         if tArcResult~=0 then
