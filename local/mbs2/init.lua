@@ -92,6 +92,7 @@ end
 function cMbs:__collectStandardBuilders()
   local astrStandardBuilders = {
     'Archive',
+    'Artifact',
     'Bin2Obj',
     'Elf2Bin',
     'GCCSymbolTemplate',
