@@ -12,11 +12,6 @@ end
 
 
 function _M.file(strSrcPath, strRename)
-  -- Check if the source path is a file.
-  local path = require 'pl.path'
-  if path.isfile(strSrcPath)~=true then
-    error('The source path "' .. tostring(strSrcPath) .. '" is no file.')
-  end
   return {
     type = 'file',
     src = strSrcPath,
