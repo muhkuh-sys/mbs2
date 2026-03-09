@@ -119,6 +119,9 @@ end
 function tBuilder:applyToEnv(tEnv, tCfg)
   local strBuilderId = self.id
 
+  -- Get a few upvalues.
+  local fnGetGitDescriptionUpvalue = self.__getGitDescription
+  local fnParseGitIDUpvalue = self.__parseGitID
   function tEnv:Version(strOutputPath, strInputPath, tParameter)
     tParameter = tParameter or {}
 
@@ -132,9 +135,9 @@ function tBuilder:applyToEnv(tEnv, tCfg)
 
     -- Get the VCS version.
     local strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged
-    local fResult, strGitDescription = pcall(self.__getGitDescription, strGitRepositoryPath)
+    local fResult, strGitDescription = pcall(fnGetGitDescriptionUpvalue, strGitRepositoryPath)
     if fResult then
-      strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = self.__parseGitID(strGitDescription)
+      strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = fnParseGitIDUpvalue(strGitDescription)
     else
       strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = 'unknown', 'unknown', false
     end
