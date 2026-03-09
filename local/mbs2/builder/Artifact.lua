@@ -12,12 +12,11 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     local strVersion = table.concat(astrVersion, '.')
 
     local path = require 'pl.path'
-    local strModulePath = path.join(
-      strRepositoryBasePath,
-      table.unpack(astrGroup),
-      strModule,
-      strVersion
-    )
+    local strModulePath = strRepositoryBasePath
+    for _, strGroupElement in ipairs(astrGroup) do
+      strModulePath = path.join(strModulePath, strGroupElement)
+    end
+    strModulePath = path.join(strModulePath, strModule, strVersion)
 
     local strHashAlgorithm = tParameter.HASH_ALGORITHM
     if type(strHashAlgorithm)~='string' then
