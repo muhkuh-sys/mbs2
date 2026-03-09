@@ -132,6 +132,25 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     if type(strGitRepositoryPath)~='string' then
       strGitRepositoryPath = path.currentdir()
     end
+    -- Append a "-SNAPSHOT" suffix to the version, if there is no tag on the
+    -- current revision.
+    -- Set ENABLE_SNAPSHOT_MARKER to false to prevent the suffix.
+    local fEnableSnapshotMarker = true
+    local tEnableSnapshotMarker = tParameter.ENABLE_SNAPSHOT_MARKER
+    local strEnableSnapshotMarkerType = type(tEnableSnapshotMarker)
+    if strEnableSnapshotMarkerType=='boolean' then
+      fEnableSnapshotMarker = tEnableSnapshotMarker
+    elseif strEnableSnapshotMarkerType=='string' then
+      if tEnableSnapshotMarker=='true' then
+        fEnableSnapshotMarker = true
+      elseif tEnableSnapshotMarker=='false' then
+        fEnableSnapshotMarker = false
+      else
+        error('Invalid value for ENABLE_SNAPSHOT_MARKER, must be true or false: ' .. tEnableSnapshotMarker)
+      end
+    elseif tEnableSnapshotMarker~=nil then
+      error('Invalid type for ENABLE_SNAPSHOT_MARKER, expected boolean or string:' .. strEnableSnapshotMarkerType)
+    end
 
     -- Get the VCS version.
     local strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged
@@ -141,7 +160,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     else
       strProjectVersionVcs, strProjectVersionVcsLong, fIsTagged = 'unknown', 'unknown', false
     end
-    local strSnapshot = (fIsTagged==false) and '-SNAPSHOT' or ''
+    local strSnapshot = (fEnableSnapshotMarker==true and fIsTagged==false) and '-SNAPSHOT' or ''
 
     -- Get the project version.
     local astrProjectVersion = self.mbs.PROJECT_VERSION
