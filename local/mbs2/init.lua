@@ -28,12 +28,26 @@ function cMbs:__readSettings()
   end
   local tDefaultSettings = {
     project = {
-      version = "0.0.0"
+      group = '',
+      module = '',
+      version = '0.0.0'
     }
   }
   if tSettings==nil then
     print('WARNING: using defauls for the settings.')
     tSettings = tDefaultSettings
+  end
+
+  local astrProjectGroup = {}
+  if type(tSettings.project.group)=='string' then
+    local strProjectGroup = tSettings.project.group
+    local stringx = require 'pl.stringx'
+    astrProjectGroup = stringx.split(strProjectGroup, '.')
+  end
+
+  local strProjectModule = ''
+  if type(tSettings.project.module)=='string' then
+    strProjectModule = tSettings.project.module
   end
 
   -- Extract the project version.
@@ -53,6 +67,9 @@ function cMbs:__readSettings()
       table.insert(astrProjectVersion, '0')
     end
   until sizProjectVersion>=3
+
+  self.astrProjectGroup = astrProjectGroup
+  self.strProjectModule = strProjectModule
   self.astrProjectVersion = astrProjectVersion
 end
 
