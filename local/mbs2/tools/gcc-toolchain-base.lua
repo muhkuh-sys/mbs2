@@ -18,7 +18,6 @@ function cGccToolchainBase:applyStandardGcc(tEnv, tCfg)
     '-fdata-sections',
     '-ffunction-sections',
 
-    '-mlong-calls',
     '-Wall',
     '-Wextra',
     '-Wconversion',

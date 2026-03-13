@@ -8,7 +8,8 @@ local tTool = {
 local atstrTargetFlags = {
   ['NETX50'] = {
     ccflags = {
-      '-mcpu=arm966e-s'
+      '-mcpu=arm966e-s',
+      '-mlong-calls'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
@@ -16,7 +17,8 @@ local atstrTargetFlags = {
 
   ['NETX56'] = {
     ccflags = {
-      '-mcpu=arm966e-s'
+      '-mcpu=arm966e-s',
+      '-mlong-calls'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
@@ -25,7 +27,8 @@ local atstrTargetFlags = {
   ['NETX90'] = {
     ccflags = {
       '-mcpu=cortex-m4',
-      '-mthumb'
+      '-mthumb',
+      '-mlong-calls'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
@@ -33,7 +36,8 @@ local atstrTargetFlags = {
 
   ['NETX500'] = {
     ccflags = {
-      '-mcpu=arm926ej-s'
+      '-mcpu=arm926ej-s',
+      '-mlong-calls'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
@@ -43,12 +47,14 @@ local atstrTargetFlags = {
     ccflags = {
       '-mcpu=cortex-a32',
       '-mthumb',
+      '-mlong-calls',
       -- Do not build code with unaligned accesses. They result in an exception.
       '-mno-unaligned-access'
     },
     -- Do not use the special v8-a libraries, as it uses unaligned accesses.
     ldflags = {
       '-mthumb',
+      '-mlong-calls',
       '-mno-unaligned-access'
     }
   },
@@ -56,7 +62,8 @@ local atstrTargetFlags = {
   ['NETX9X2_SECENC_MPW'] = {
     ccflags = {
       '-mcpu=cortex-m0plus',
-      '-mthumb'
+      '-mthumb',
+      '-mlong-calls'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
