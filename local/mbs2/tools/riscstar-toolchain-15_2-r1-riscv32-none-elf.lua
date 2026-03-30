@@ -9,7 +9,7 @@ local atstrTargetFlags = {
   ['NETX9X2_ADA_MPW'] = {
     ccflags = {
       '-mabi=ilp32',
-      '-march=rv32imac_zicsr'
+      '-march=rv32imac_zifencei_zicsr_zba_zbb_zbs'
     },
     -- Use the ccflags also for the linker.
     ldflags = nil
