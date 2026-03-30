@@ -16,19 +16,33 @@ local tBuilder = {
 function tBuilder:applyToEnv(tEnv, tCfg)
   local tMbs = tEnv.mbs
 
-  function tEnv:Elf2Bin(strOutputPath, strInputPath)
+  function tEnv:Elf2Bin(strOutputPath, strInputPath, astrOnlySections)
     local _tMbs = self.mbs
     local strObjcopy = _tMbs.GCC_OBJCOPY
+
+    local astrCmd = {
+        strObjcopy,
+        '-O', 'binary'
+    }
+
+    if type(astrOnlySections)=='string' then
+      astrOnlySections = { astrOnlySections }
+    end
+    if type(astrOnlySections)=='table' then
+      for _, strOnlySection in ipairs(astrOnlySections) do
+        if type(strOnlySection)=='string' then
+          table.insert(astrCmd, '--only-section=' .. strOnlySection)
+        end
+      end
+    end
+
+    table.insert(astrCmd, strInputPath)
+    table.insert(astrCmd, strOutputPath)
 
     AddJob(
       strOutputPath,
       self.labelprefix .. 'Elf2Bin ' .. strOutputPath,
-      table.concat({
-        strObjcopy,
-        '-O', 'binary',
-        strInputPath,
-        strOutputPath
-      }, ' ')
+      table.concat(astrCmd, ' ')
     )
     AddDependency(strOutputPath, strInputPath)
 
