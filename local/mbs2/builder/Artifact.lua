@@ -47,7 +47,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
     -- Create the configuration from the template.
     local tConfiguration = tEnv:Version(
       path.join(strModulePath, string.format('%s-%s.xml', strArtifact, strVersion)),
-      string.format('installer/jonchki/%s.xml', strModule),
+      string.format('installer/jonchki/%s.xml', strArtifact),
       {
         REPOSITORY_PATH = tParameter.REPOSITORY_PATH,
         ENABLE_SNAPSHOT_MARKER = tParameter.ENABLE_SNAPSHOT_MARKER
