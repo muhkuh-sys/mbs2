@@ -90,7 +90,7 @@ function tBuilder:__addContents(tArchive, tReader, tArchiveContents, astrPathEle
           strPathAndName = strBasename
         else
           strPathAndName = path.join(
-           table.concat(astrPathElements),
+            table.concat(astrPathElements, '/'),
             strBasename
           )
         end
