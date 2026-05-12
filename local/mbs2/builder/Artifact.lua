@@ -5,7 +5,7 @@ local tBuilder = {
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(_, tEnv, tCfg)
   function tEnv:Artifact(strRepositoryBasePath, astrGroup, strModule, strArtifact, astrVersion, tArchiveContents, tParameter)
     tParameter = tParameter or {}
 

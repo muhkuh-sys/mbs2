@@ -13,7 +13,7 @@ local tBuilder = {
 }
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(_, tEnv, tCfg)
   local tMbs = tEnv.mbs
 
   function tEnv:Bin2Obj(strOutputPath, strInputPath, tParameter)

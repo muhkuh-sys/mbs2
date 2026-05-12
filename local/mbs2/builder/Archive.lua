@@ -270,7 +270,7 @@ end
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(strBuilderModule, tEnv, tCfg)
   local strBuilderId = self.id
 
   local atArchiveFormatsUpvalue = self.atArchiveFormats
@@ -300,7 +300,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
       output = strOutputPath,
       format = strArchiveFormat
     }
-    self:addLuaJob(strBuilderId, strBuilderId, strOutputPath, tJobParameter)
+    self:addLuaJob(strBuilderModule, strBuilderId, strOutputPath, tJobParameter)
 
     -- Collect all files in the archive contents.
     local astrAllSrcFiles = require 'mbs2.archive_helper':getAllFiles(atContents)

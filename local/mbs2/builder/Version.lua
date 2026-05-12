@@ -116,7 +116,7 @@ end
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(strBuilderModule, tEnv, tCfg)
   local strBuilderId = self.id
 
   -- Get a few upvalues.
@@ -196,7 +196,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
       replace = atReplace,
       pattern = strPattern
     }
-    self:addLuaJob(strBuilderId, strBuilderId, strOutputPath, tJobParameter)
+    self:addLuaJob(strBuilderModule, strBuilderId, strOutputPath, tJobParameter)
 
     AddDependency(strOutputPath, strInputPath)
 

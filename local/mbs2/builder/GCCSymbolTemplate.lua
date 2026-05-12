@@ -91,7 +91,7 @@ end
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(strBuilderModule, tEnv, tCfg)
   local strBuilderId = self.id
 
   function tEnv:GCCSymbolTemplate(strOutputPath, strInputElfPath, strInputTemplate, tParameter)
@@ -112,7 +112,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
       readelf = tMbs.GCC_READELF,
       objdump = tMbs.GCC_OBJDUMP
     }
-    self:addLuaJob(strBuilderId, strBuilderId, strOutputPath, tJobParameter)
+    self:addLuaJob(strBuilderModule, strBuilderId, strOutputPath, tJobParameter)
 
     -- The generated file depends on the ELF file and the template.
     AddDependency(strOutputPath, strInputElfPath)

@@ -24,7 +24,7 @@ local atMapNetxTypeToPatchTable = {
   ['NETX90']  = 'hboot_netx90_patch_table.xml'
 }
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(_, tEnv, tCfg)
   -- TODO: Move this to a "tool" instance.
   local tMbs = tEnv.mbs
   tMbs.HBOOTIMAGECOMPILER_PATH = '/home/cthelen/Tools/hboot_image_compiler/0.0.1'

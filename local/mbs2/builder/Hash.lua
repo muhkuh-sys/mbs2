@@ -106,7 +106,7 @@ end
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(strBuilderModule, tEnv, tCfg)
   local strBuilderId = self.id
 
   local atKnownHashesUpvalue = self.knownHashes
@@ -147,7 +147,7 @@ function tBuilder:applyToEnv(tEnv, tCfg)
       hashAlgorithms = astrHashAlgorithms,
       hashTemplate = strHashTemplate
     }
-    self:addLuaJob(strBuilderId, strBuilderId, strOutputPath, tJobParameter)
+    self:addLuaJob(strBuilderModule, strBuilderId, strOutputPath, tJobParameter)
     AddDependency(strOutputPath, strInputPath)
 
     return strOutputPath

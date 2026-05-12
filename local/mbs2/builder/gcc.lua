@@ -182,7 +182,7 @@ end
 
 
 
-function tBuilder:applyToEnv(tEnv, tCfg)
+function tBuilder:applyToEnv(_, tEnv, tCfg)
   tEnv.cc.DriverC = DriverGCC_Get('exe_c', '_c_cache', 'flags_c')
   tEnv.cc.DriverCXX = DriverGCC_Get('exe_cxx', '_cxx_cache', 'flags_cxx')
   tEnv.cc.Output = self.translateFilename
