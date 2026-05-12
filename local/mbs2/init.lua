@@ -107,31 +107,19 @@ end
 --
 -- Collect all standard builders.
 --
-function cMbs:__collectStandardBuilders()
-  local astrStandardBuilders = {
-    'Archive',
-    'Artifact',
-    'Bin2Obj',
-    'Elf2Bin',
-    'GCCSymbolTemplate',
-    'gcc',
-    'Hash',
-    'hboot_image',
-    'Version'
-  }
-  local atStandardBuilders = {}
-  local path = require 'pl.path'
-  for _, strBuilder in ipairs(astrStandardBuilders) do
-    local strModulePath = path.join('mbs2', 'builder', strBuilder)
-    local fReqireResult, tBuilder = pcall(require, strModulePath)
-    if fReqireResult~=true then
-      error('Failed to load the builder "' .. strBuilder .. '": ' .. tostring(tBuilder))
-    else
-      table.insert(atStandardBuilders, tBuilder)
-    end
-  end
-  self.builder = atStandardBuilders
-end
+cMbs.__astrStandardBuilders = {
+  'mbs2.builder.Archive',
+  'mbs2.builder.Artifact',
+  'mbs2.builder.Bin2Obj',
+  'mbs2.builder.Elf2Bin',
+  'mbs2.builder.GCCSymbolTemplate',
+  'mbs2.builder.gcc',
+  'mbs2.builder.Hash',
+  'mbs2.builder.hboot_image',
+  'mbs2.builder.ObjDump',
+  'mbs2.builder.Strip',
+  'mbs2.builder.Version'
+}
 
 
 
@@ -164,7 +152,9 @@ end
 
 
 
-function cMbs:createEnv(strID, atRequiredTools, tCfg)
+function cMbs:createEnv(strID, atRequiredTools, tCfg, astrLocalBuilder)
+  astrLocalBuilder = astrLocalBuilder or {}
+
   -- Does an environment whith this ID already exist?
   if self.atEnv[strID]~=nil then
     error('An environment with the ID "' .. strID .. '" already exists.')
@@ -248,18 +238,26 @@ function cMbs:createEnv(strID, atRequiredTools, tCfg)
     end
 
     if tEnv~=nil then
-      -- Apply all standard builders to the environment.
-      for _, tBuilder in ipairs(self.builder) do
-        local fApplyResult, strApplyError = tBuilder:applyToEnv(tEnv, tCfg)
-        if fApplyResult~=true then
-          tEnv = nil
-          strError = string.format(
-            'Failed to apply the builder with ID "%s" and version %s to the environment: %s',
-            tostring(tBuilder.id),
-            tostring(tBuilder.version),
-            tostring(strApplyError)
-          )
-          break
+      local tablex = require 'pl.tablex'
+      local astrBuilderIDs = tablex.copy(self.__astrStandardBuilders)
+      tablex.insertvalues(astrBuilderIDs, astrLocalBuilder)
+
+      for _, strBuilderID in ipairs(astrBuilderIDs) do
+        local fReqireResult, tBuilder = pcall(require, strBuilderID)
+        if fReqireResult~=true then
+          error('Failed to load the builder "' .. strBuilderID .. '": ' .. tostring(tBuilder))
+        else
+          local fApplyResult, strApplyError = tBuilder:applyToEnv(strBuilderID, tEnv, tCfg)
+          if fApplyResult~=true then
+            tEnv = nil
+            strError = string.format(
+              'Failed to apply the builder with ID "%s" and version %s to the environment: %s',
+              tostring(tBuilder.id),
+              tostring(tBuilder.version),
+              tostring(strApplyError)
+            )
+            break
+          end
         end
       end
     end
@@ -425,6 +423,5 @@ end
 
 cMbs:__readSettings()
 cMbs:__collectRegisteredTools()
-cMbs:__collectStandardBuilders()
 
 return cMbs
