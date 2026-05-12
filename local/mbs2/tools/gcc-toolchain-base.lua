@@ -77,6 +77,7 @@ function cGccToolchainBase:applyStandardGcc(tEnv, tCfg)
   tMbs.GCC_OBJCOPY = strToolchainExePrefix .. 'objcopy'
   tMbs.GCC_OBJDUMP = strToolchainExePrefix .. 'objdump'
   tMbs.GCC_READELF = strToolchainExePrefix .. 'readelf'
+  tMbs.GCC_STRIP = strToolchainExePrefix .. 'strip'
 end
 
 
