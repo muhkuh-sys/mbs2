@@ -208,6 +208,10 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
     self.cc.includes:Merge(...)
   end
 
+  function tEnv:AddDefines(...)
+    self.cc.defines:Merge(...)
+  end
+
   function tEnv:Compile(...)
     return Compile(self, ...)
   end
