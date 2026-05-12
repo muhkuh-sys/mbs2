@@ -85,6 +85,7 @@ end
 function cMbs:__collectRegisteredTools()
   local astrRegisteredTools = {
     'arm-none-eabi-10_3-2021_10',
+    'exoraw-2_0_7_3',
     'riscstar-toolchain-15_2-r1-riscv32-none-elf'
   }
   local path = require 'pl.path'
