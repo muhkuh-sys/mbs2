@@ -27,6 +27,11 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
       strHashTemplate = '${ID_UC}:${HASH}\n'
     end
 
+    local strArtifactConfiguration = tParameter.ARTIFACT_CONFIG_PATH
+    if type(strArtifactConfiguration)~='string' then
+      strArtifactConfiguration = string.format('installer/jonchki/%s.xml', strArtifact)
+    end
+
     -- Create the artifact.
     local tArtifact = tEnv:Archive(
       path.join(strModulePath, string.format('%s-%s.tar.lzip', strArtifact, strVersion)),
@@ -47,7 +52,7 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
     -- Create the configuration from the template.
     local tConfiguration = tEnv:Version(
       path.join(strModulePath, string.format('%s-%s.xml', strArtifact, strVersion)),
-      string.format('installer/jonchki/%s.xml', strArtifact),
+      strArtifactConfiguration,
       {
         REPOSITORY_PATH = tParameter.REPOSITORY_PATH,
         ENABLE_SNAPSHOT_MARKER = tParameter.ENABLE_SNAPSHOT_MARKER
