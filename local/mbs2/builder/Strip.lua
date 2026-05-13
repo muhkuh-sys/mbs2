@@ -12,7 +12,8 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
     local strStrip = _tMbs.GCC_STRIP
 
     local astrCmd = {
-        strStrip
+        strStrip,
+        '-o', strOutputPath
     }
 
     local strType = type(astrOptions)
@@ -21,8 +22,11 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
       astrOptions = { astrOptions }
     elseif strType=='nil' then
       -- Set default options if nothing was specified.
-      astrOptions = {}
-    else
+      astrOptions = {
+        '--strip-unneeded',
+        '--enable-deterministic-archives'
+      }
+    elseif strType~='table' then
       error('Invalid options, must be string or table.')
     end
 
@@ -32,8 +36,7 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
       end
     end
 
-    table.insert(astrCmd, '-o')
-    table.insert(astrCmd, strOutputPath)
+    -- Add the file as the last element.
     table.insert(astrCmd, strInputPath)
 
     AddJob(
