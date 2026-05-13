@@ -219,10 +219,9 @@ function tBuilder:applyToEnv(_, tEnv, tCfg)
   function tEnv:Link(strTargetPath, ...)
     local tOutput = Link(self, strTargetPath, ...)
 
-    local strMapFile = PathBase(strTargetPath) .. '.map '
-    -- FIXME: This does not work, the map file is still there after a "clean".
+    local strMapFile = PathBase(strTargetPath) .. '.map'
     AddClean(tOutput, strMapFile)
-  --  AddSideEffect(tOutput, strMapFile)
+    AddOutput(tOutput, strMapFile)
 
     return tOutput
   end
